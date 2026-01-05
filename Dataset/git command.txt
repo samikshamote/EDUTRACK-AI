@@ -1,0 +1,2 @@
+git checkout -b branchname          
+git push origin main 
