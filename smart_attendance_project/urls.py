@@ -19,7 +19,12 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # 🔴 THIS LINE WAS MISSING
+    path('accounts/', include('django.contrib.auth.urls')),
+
     path('students/', include('students.urls')),
     path('teachers/', include('teachers.urls')),
     path('attendance/', include('attendance.urls')),
 ]
+
