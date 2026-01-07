@@ -133,3 +133,5 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+LOGIN_REDIRECT_URL = '/students/'   # or '/teachers/' or '/attendance/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
