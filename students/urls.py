@@ -5,3 +5,4 @@ urlpatterns = [
     path('', views.dashboard, name='student_home'),
     path('dashboard/', views.dashboard, name='student_dashboard'),
 ]
+

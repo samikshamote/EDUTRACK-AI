@@ -1,1 +1,1 @@
-console.log("Smart Attendance Loaded");
+console.log("Smart Attendance UI Loaded");

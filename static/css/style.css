@@ -1,18 +1,83 @@
-body {
-    font-family: Arial;
-    background: #f2f2f2;
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
-.navbar {
-    background: #4b7bec;
+body {
+    background: #f4f6f9;
+}
+
+/* Layout */
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    background: #0d6efd;
     color: white;
-    padding: 15px;
+    padding: 20px;
 }
 
-.container {
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin: 15px 0;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.sidebar ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+}
+
+/* Top Bar */
+.topbar {
+    background: white;
+    padding: 15px 25px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Page Content */
+.content {
+    padding: 25px;
+}
+
+/* Dashboard Cards */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.card {
     background: white;
     padding: 20px;
-    margin: 20px;
     border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+    color: #0d6efd;
+    margin-bottom: 10px;
 }

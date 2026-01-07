@@ -1,11 +1,25 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}Teacher Dashboard{% endblock %}
+{% block header %}Teacher Dashboard{% endblock %}
 
 {% block content %}
-<h1>Teacher Dashboard</h1>
+<h2>Welcome {{ request.user.username }}</h2>
 
-<p>Welcome teacher!</p>
+<div class="cards">
+    <div class="card">
+        <h3>Total Students</h3>
+        <p>60</p>
+    </div>
 
-<a href="{% url 'mark-attendance' %}">Mark Attendance</a>
+    <div class="card">
+        <h3>Total Subjects</h3>
+        <p>5</p>
+    </div>
+
+    <div class="card">
+        <h3>Today Attendance</h3>
+        <p>Marked</p>
+    </div>
+</div>
 {% endblock %}
