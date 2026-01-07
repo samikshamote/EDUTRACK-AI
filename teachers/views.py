@@ -5,4 +5,3 @@ from django.contrib.auth.decorators import login_required
 def teacher_dashboard(request):
     return render(request, 'teachers/dashboard.html')
 
-# Create your views here.

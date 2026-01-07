@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance{% endblock %}
+
+{% block content %}
+<h1>Mark Attendance</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Student Name:</label>
+    <input type="text" name="student">
+
+    <label>Status:</label>
+    <select name="status">
+        <option value="Present">Present</option>
+        <option value="Absent">Absent</option>
+    </select>
+
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

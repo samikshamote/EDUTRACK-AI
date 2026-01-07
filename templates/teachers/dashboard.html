@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<h1>Teacher Dashboard</h1>
+
+<p>Welcome teacher!</p>
+
+<a href="{% url 'mark-attendance' %}">Mark Attendance</a>
+{% endblock %}
