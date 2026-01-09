@@ -27,31 +27,21 @@ def mark_attendance(name):
     if name == "Unknown":
         return
 
-    file_exists = os.path.isfile("attendance.csv")
+    output_file = "face_recognition_engine/recognized_today.txt"
 
-    # Create file with header if not exists
-    if not file_exists:
-        with open("attendance.csv", "w") as f:
-            f.write("Name,Date,Time\n")
+    # Create file if not exists
+    if not os.path.exists(output_file):
+        open(output_file, "w").close()
 
-    # Read existing lines
-    with open("attendance.csv", "r") as f:
-        lines = f.readlines()
+    with open(output_file, "r") as f:
+        names = f.read().splitlines()
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    if name not in names:
+        with open(output_file, "a") as f:
+            f.write(name + "\n")
 
-    # Check if already marked today
-    for line in lines[1:]:  # skip header
-        entry = line.strip().split(",")
-        if entry[0] == name and entry[1] == today:
-            return  # already marked
+        print(f"✔ Recognized: {name}")
 
-    # Append new entry
-    now = datetime.now()
-    time = now.strftime("%H:%M:%S")
-    with open("attendance.csv", "a") as f:
-        f.write(f"{name},{today},{time}\n")
-    print(f"✔ Attendance marked: {name}")
 
 # Start webcam
 video = cv2.VideoCapture(0)

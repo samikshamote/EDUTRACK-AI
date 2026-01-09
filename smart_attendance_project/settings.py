@@ -29,7 +29,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,11 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-     # Your apps
+    # Your apps
     'students',
     'teachers',
     'attendance',
+    'core',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -134,6 +135,7 @@ STATICFILES_DIRS = [
 ]
 
 
-LOGIN_REDIRECT_URL = '/students/dashboard/'
+#LOGIN_REDIRECT_URL = '/students/dashboard/'
+LOGIN_REDIRECT_URL = '/redirect/'
+LOGIN_URL = '/accounts/login/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
-
