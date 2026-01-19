@@ -22,3 +22,8 @@ Thumbs.db
 
 # Python virtual environment
 venv/
+
+# Face recognition generated files
+face_recognition_engine/encodings.pkl
+face_recognition_engine/attendance.csv
+face_recognition_engine/recognized_today.txt

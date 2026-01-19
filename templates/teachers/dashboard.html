@@ -6,20 +6,25 @@
 {% block content %}
 <h2>Welcome {{ request.user.username }}</h2>
 
-<div class="cards">
-    <div class="card">
-        <h3>Total Students</h3>
-        <p>60</p>
-    </div>
+<h3>Select Subject</h3>
 
-    <div class="card">
-        <h3>Total Subjects</h3>
-        <p>5</p>
-    </div>
+<form method="get">
+    <select name="subject_id" required>
+        <option value="">-- Select Subject --</option>
+        {% for subject in subjects %}
+            <option value="{{ subject.id }}">{{ subject.name }}</option>
+        {% endfor %}
+    </select>
 
-    <div class="card">
-        <h3>Today Attendance</h3>
-        <p>Marked</p>
-    </div>
-</div>
+    <br><br>
+
+    <button type="submit" formaction="{% url 'start_attendance' %}">
+        🎥 Start Attendance
+    </button>
+
+    <button type="submit" formaction="{% url 'save_attendance' 0 %}">
+        💾 Save Attendance
+    </button>
+</form>
+
 {% endblock %}

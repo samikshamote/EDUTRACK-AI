@@ -5,6 +5,11 @@ import numpy as np
 from datetime import datetime
 import os
 
+recognized_file = "face_recognition_engine/recognized_today.txt"
+
+# Ensure file exists
+open(recognized_file, "a").close()
+
 # Load encodings
 with open("face_recognition_engine/encodings.pkl", "rb") as f:
 
