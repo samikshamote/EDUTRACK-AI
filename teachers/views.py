@@ -1,25 +1,47 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 import subprocess
 import sys
 import os
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from students.models import Student
-from attendance.models import Attendance, Subject
 from django.utils import timezone
 
-# teachers/views.py
-from attendance.models import Subject
+from students.models import Student
+from attendance.models import Attendance, Subject
+
+
 
 @login_required
 def teacher_dashboard(request):
     subjects = Subject.objects.all()
-    return render(
-        request,
-        'teachers/dashboard.html',
-        {'subjects': subjects}
-    )
 
+    # Subject-wise attendance calculation
+    subject_labels = []
+    subject_percentages = []
+
+    for subject in subjects:
+        total = Attendance.objects.filter(subject=subject).count()
+        present = Attendance.objects.filter(subject=subject, status=True).count()
+
+        percentage = int((present / total) * 100) if total > 0 else 0
+
+        subject_labels.append(subject.name)
+        subject_percentages.append(percentage)
+
+    # Overall attendance
+    total_attendance = Attendance.objects.count()
+    total_present = Attendance.objects.filter(status=True).count()
+    total_absent = total_attendance - total_present
+
+    context = {
+        'subjects': subjects,
+        'subject_labels': subject_labels,
+        'subject_percentages': subject_percentages,
+        'present_count': total_present,
+        'absent_count': total_absent,
+    }
+
+    return render(request, 'teachers/dashboard.html', context)
 
 
 @login_required
@@ -34,7 +56,7 @@ def start_attendance(request):
 
     subprocess.Popen([sys.executable, script_path])
 
-    return HttpResponse("Camera started. Attendance is being marked.")
+    return HttpResponse("📷 Camera started. Attendance is being marked.")
 
 
 @login_required
@@ -47,7 +69,7 @@ def save_attendance(request):
     try:
         subject = Subject.objects.get(id=subject_id)
     except Subject.DoesNotExist:
-        return HttpResponse("❌ Invalid subject selected")
+        return HttpResponse("❌ Invalid subject")
 
     file_path = "face_recognition_engine/recognized_today.txt"
 
@@ -71,7 +93,6 @@ def save_attendance(request):
         except Student.DoesNotExist:
             continue
 
-    # Clear file after saving
     open(file_path, "w").close()
 
     return HttpResponse("✅ Attendance saved successfully")

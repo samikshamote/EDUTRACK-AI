@@ -1,8 +1,10 @@
 {% extends "base.html" %}
-{% load static %}
+
+{% block title %}Student Dashboard{% endblock %}
+{% block header %}Student Dashboard{% endblock %}
 
 {% block content %}
-<h2>Welcome {{ request.user.username }}</h2>
+<h2>Welcome, {{ request.user.username }}</h2>
 
 <div class="cards">
     <div class="card">
@@ -16,8 +18,21 @@
     </div>
 
     <div class="card">
+        <h3>Absent</h3>
+        <p>{{ total|add:"-present" }}</p>
+    </div>
+
+    <div class="card">
         <h3>Attendance %</h3>
         <p>{{ percentage }}%</p>
     </div>
 </div>
+
+<br>
+
+<div class="card">
+    <h3>Attendance Summary</h3>
+    <p>Your attendance is calculated automatically using face recognition.</p>
+</div>
+
 {% endblock %}
