@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block header %}Attendance Records{% endblock %}
+
+{% block content %}
+<table border="1" cellpadding="10">
+    <tr>
+        <th>Student</th>
+        <th>Subject</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Status</th>
+    </tr>
+
+    {% for a in records %}
+    <tr>
+        <td>{{ a.student.user.username }}</td>
+        <td>{{ a.subject.name }}</td>
+        <td>{{ a.date }}</td>
+        <td>{{ a.time }}</td>
+        <td>
+            {% if a.status %}Present{% else %}Absent{% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5">No attendance found</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -22,9 +22,12 @@
         🎥 Start Attendance
     </button>
 
-    <button type="submit" formaction="{% url 'save_attendance' 0 %}">
+    <button type="submit" formaction="{% url 'save_attendance' %}">
         💾 Save Attendance
     </button>
-</form>
+    <a href="{% url 'view_attendance' %}">
+    📊 View Attendance
+    </a>
 
+</form>
 {% endblock %}
