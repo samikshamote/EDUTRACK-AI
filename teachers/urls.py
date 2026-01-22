@@ -6,5 +6,6 @@ urlpatterns = [
     path('start-attendance/', views.start_attendance, name='start_attendance'),
     path('save-attendance/', views.save_attendance, name='save_attendance'),
     path('view-attendance/', views.view_attendance, name='view_attendance'),
-
+    path('export-attendance/', views.export_attendance_csv, name='export_attendance_csv'),
+    path('profile/', views.teacher_profile, name='teacher_profile'),
 ]

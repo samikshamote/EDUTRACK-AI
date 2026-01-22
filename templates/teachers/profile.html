@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block header %}Teacher Profile{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-section">
+
+    <div class="action-card profile-card">
+
+        <!-- PROFILE HEADER -->
+        <div class="profile-header">
+            {% if teacher.photo %}
+                <img src="{{ teacher.photo.url }}" class="profile-photo">
+            {% else %}
+                <img src="{% static 'images/default-user.png' %}" class="profile-photo">
+            {% endif %}
+
+            <div>
+                <h2>{{ request.user.get_full_name|default:request.user.username }}</h2>
+                <p class="muted">{{ request.user.email }}</p>
+            </div>
+        </div>
+
+        <!-- PROFILE COMPLETION -->
+        <div class="profile-progress">
+            <p>Profile Completion: {{ teacher.profile_completion }}%</p>
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     style="width: {{ teacher.profile_completion }}%;">
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- DETAILS -->
+        <div class="profile-details">
+            <p><strong>Department:</strong> {{ teacher.department }}</p>
+            <p><strong>Phone:</strong> {{ teacher.phone|default:"Not provided" }}</p>
+            <p><strong>Qualification:</strong> {{ teacher.qualification|default:"Not provided" }}</p>
+            <p><strong>Total Subjects:</strong> {{ teacher.subject_set.count }}</p>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="profile-actions">
+            <a href="#" class="btn primary">
+                <i class="fa-solid fa-pen"></i> Edit Profile
+            </a>
+
+            <a href="{% url 'teacher_dashboard' %}" class="btn outline">
+                ⬅ Back
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

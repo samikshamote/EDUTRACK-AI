@@ -11,34 +11,82 @@
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Chart.js -->
+    <!-- Chart.js (used in dashboards) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'js/main.js' %}"></script>
+
+    {% block extra_head %}{% endblock %}
 </head>
 
 <body>
 
 <div class="layout">
 
+    <!-- ========== SIDEBAR ========== -->
     <aside class="sidebar">
 
-    <div class="college-brand">
-        <img src="{% static 'images/kaveri_logo.png' %}" alt="College Logo">
-        <h2>Kaveri College</h2>
-        <p>Arts, Science & Commerce<br>Pune</p>
-    </div>
+        <div class="college-brand">
+            <img src="{% static 'images/kaveri_logo.png' %}" alt="College Logo">
+            <h2>Kaveri College</h2>
+            <p>Arts, Science & Commerce<br>Pune</p>
+        </div>
 
-    <ul class="menu">
-        <li><a href="/students/dashboard/">Student Dashboard</a></li>
-        <li><a href="/teachers/dashboard/">Teacher Dashboard</a></li>
-        <li><a href="/teachers/dashboard/">Attendance</a></li>
-        <li><a href="/accounts/logout/">Logout</a></li>
-    </ul>
+        <ul class="menu">
 
-</aside>
+            <!-- STUDENT LINKS -->
+            {% if request.user.is_authenticated and request.user.student %}
+                <li>
+                    <a href="{% url 'student_dashboard' %}">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        Student Dashboard
+                    </a>
+                </li>
 
+                <li>
+                    <a href="{% url 'student_profile' %}">
+                        <i class="fa-solid fa-id-card"></i>
+                        My Profile
+                    </a>
+                </li>
+            {% endif %}
 
-    <!-- Main Content -->
+            <!-- TEACHER LINKS -->
+            {% if request.user.is_authenticated and request.user.teacher %}
+                <li>
+                    <a href="{% url 'teacher_dashboard' %}">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                        Teacher Dashboard
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'view_attendance' %}">
+                        <i class="fa-solid fa-calendar-check"></i>
+                        Attendance
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'teacher_profile' %}">
+                        <i class="fa-solid fa-id-card"></i>
+                        My Profile
+                    </a>
+                </li>
+            {% endif %}
+
+            <!-- LOGOUT -->
+            {% if request.user.is_authenticated %}
+            <li>
+                <a href="{% url 'logout' %}">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </li>
+            {% endif %}
+
+        </ul>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
     <main class="main-content">
         <header class="topbar">
             <h3>{% block header %}{% endblock %}</h3>
@@ -50,6 +98,9 @@
     </main>
 
 </div>
+
+<!-- Page-specific JS -->
+{% block extra_js %}{% endblock %}
 
 </body>
 </html>

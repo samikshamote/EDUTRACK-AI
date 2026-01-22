@@ -3,7 +3,31 @@
 {% block header %}Attendance Records{% endblock %}
 
 {% block content %}
-<table border="1" cellpadding="10">
+
+<!-- ===== FILTER + EXPORT ===== -->
+<form method="get" style="margin-bottom:20px;">
+    <select name="subject">
+        <option value="">All Subjects</option>
+        {% for subject in subjects %}
+            <option value="{{ subject.id }}"
+                {% if request.GET.subject == subject.id|stringformat:"s" %}selected{% endif %}>
+                {{ subject.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <input type="date" name="date" value="{{ request.GET.date }}">
+
+    <button type="submit" class="btn primary">Filter</button>
+
+    <a href="{% url 'export_attendance_csv' %}?subject={{ request.GET.subject }}&date={{ request.GET.date }}"
+       class="btn success">
+        Export CSV
+    </a>
+</form>
+
+<!-- ===== ATTENDANCE TABLE ===== -->
+<table border="1" cellpadding="10" width="100%">
     <tr>
         <th>Student</th>
         <th>Subject</th>
@@ -19,13 +43,20 @@
         <td>{{ a.date }}</td>
         <td>{{ a.time }}</td>
         <td>
-            {% if a.status %}Present{% else %}Absent{% endif %}
+            {% if a.status %}
+                <span style="color:green;">Present</span>
+            {% else %}
+                <span style="color:red;">Absent</span>
+            {% endif %}
         </td>
     </tr>
     {% empty %}
     <tr>
-        <td colspan="5">No attendance found</td>
+        <td colspan="5" style="text-align:center;">
+            No attendance found
+        </td>
     </tr>
     {% endfor %}
 </table>
+
 {% endblock %}
