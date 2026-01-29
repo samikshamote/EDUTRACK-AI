@@ -8,6 +8,7 @@ class Teacher(models.Model):
     phone = models.CharField(max_length=15, blank=True)
     qualification = models.CharField(max_length=100, blank=True)
 
+    @property
     def profile_completion(self):
         filled = 0
         total = 4
@@ -21,5 +22,3 @@ class Teacher(models.Model):
 
     def __str__(self):
         return self.user.username
-
-

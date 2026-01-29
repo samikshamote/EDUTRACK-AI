@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from attendance.models import Attendance
+from .forms import StudentProfileForm
 
 
 @login_required
@@ -31,17 +32,28 @@ def student_profile(request):
     student = request.user.student
 
     if request.method == 'POST':
-        student.phone = request.POST.get('phone')
-        student.department = request.POST.get('department')
-
-        if request.FILES.get('photo'):
-            student.photo = request.FILES['photo']
-
-        student.save()
-        return redirect('student_profile')
+        form = StudentProfileForm(request.POST, request.FILES, instance=student)
+        if form.is_valid():
+            form.save()
+            return redirect('student_profile')
+    else:
+        form = StudentProfileForm(instance=student)
 
     return render(request, 'students/profile.html', {
-        'student': student
+        'student': student,
+        'form': form
     })
 
+@login_required
+def edit_student_profile(request):
+    student = request.user.student
 
+    if request.method == 'POST':
+        form = StudentProfileForm(request.POST, request.FILES, instance=student)
+        if form.is_valid():
+            form.save()
+            return redirect('student_profile')
+    else:
+        form = StudentProfileForm(instance=student)
+
+    return render(request, 'students/edit_profile.html', {'form': form})

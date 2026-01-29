@@ -8,4 +8,6 @@ urlpatterns = [
     path('view-attendance/', views.view_attendance, name='view_attendance'),
     path('export-attendance/', views.export_attendance_csv, name='export_attendance_csv'),
     path('profile/', views.teacher_profile, name='teacher_profile'),
+    path('profile/edit/', views.edit_teacher_profile, name='edit_teacher_profile'),
 ]
+

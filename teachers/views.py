@@ -10,6 +10,8 @@ import csv
 from students.models import Student
 from attendance.models import Attendance, Subject
 
+from .forms import TeacherProfileForm
+
 
 @login_required
 def teacher_dashboard(request):
@@ -169,16 +171,29 @@ def teacher_profile(request):
     teacher = request.user.teacher
 
     if request.method == 'POST':
-        teacher.phone = request.POST.get('phone')
-        teacher.qualification = request.POST.get('qualification')
-
-        if request.FILES.get('photo'):
-            teacher.photo = request.FILES['photo']
-
-        teacher.save()
-        return redirect('teacher_profile')
+        form = TeacherProfileForm(request.POST, request.FILES, instance=teacher)
+        if form.is_valid():
+            form.save()
+            return redirect('teacher_profile')
+    else:
+        form = TeacherProfileForm(instance=teacher)
 
     return render(request, 'teachers/profile.html', {
-        'teacher': teacher
+        'teacher': teacher,
+        'form': form
     })
 
+@login_required
+def edit_teacher_profile(request):
+    teacher = request.user.teacher
+
+    if request.method == 'POST':
+        form = TeacherProfileForm(request.POST, request.FILES, instance=teacher)
+        if form.is_valid():
+            form.save()
+            return redirect('teacher_profile')
+    else:
+        form = TeacherProfileForm(instance=teacher)
+
+    # 👇 THIS IS WHERE THAT LINE GOES
+    return render(request, 'teachers/edit_profile.html', {'form': form})

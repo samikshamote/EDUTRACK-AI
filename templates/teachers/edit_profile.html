@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block header %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="dashboard-section">
+
+    <div class="action-card edit-profile-card">
+
+        <h3 class="center">Edit Your Profile</h3>
+        <p class="muted center">Keep your information up to date</p>
+
+        <form method="POST" enctype="multipart/form-data" class="edit-form">
+            {% csrf_token %}
+
+            <!-- Profile Photo -->
+            <div class="photo-section">
+                {% if form.instance.photo %}
+                    <img src="{{ form.instance.photo.url }}" class="edit-profile-photo">
+                {% else %}
+                    <img src="{% static 'images/default-user.png' %}" class="edit-profile-photo">
+                {% endif %}
+            </div>
+
+            <!-- Form Fields -->
+            <div class="form-grid">
+                {{ form.as_p }}
+            </div>
+
+            <!-- Buttons -->
+            <div class="form-actions">
+                <button type="submit" class="btn primary">
+                    💾 Save Changes
+                </button>
+
+                <a href="javascript:history.back()" class="btn outline">
+                    ❌ Cancel
+                </a>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}
