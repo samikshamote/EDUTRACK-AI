@@ -10,8 +10,7 @@ def role_redirect(request):
     if Teacher.objects.filter(user=user).exists():
         return redirect('teacher_dashboard')
 
-    elif Student.objects.filter(user=user).exists():
+    if Student.objects.filter(user=user).exists():
         return redirect('student_dashboard')
 
-    else:
-        return redirect('/admin/')
+    return redirect('/admin/')
