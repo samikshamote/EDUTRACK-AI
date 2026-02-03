@@ -775,3 +775,102 @@ body {
     cursor: pointer;
     color: var(--text-main);
 }
+
+/* =========================
+   🔐 PASSWORD CHANGE PAGE
+   ========================= */
+
+.password-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 120px);
+}
+
+.password-card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 32px 30px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-soft);
+}
+
+.password-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    color: white;
+    font-size: 22px;
+}
+
+.password-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.password-header p {
+    font-size: 14px;
+}
+
+/* Form */
+.password-form .form-group {
+    margin-bottom: 18px;
+}
+
+.password-form label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.password-form input {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-main);
+}
+
+.password-form input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    outline: none;
+}
+
+/* Actions */
+.password-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.password-actions .btn {
+    flex: 1;
+    text-align: center;
+}
+
+/* Error */
+.form-error {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

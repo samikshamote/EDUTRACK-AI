@@ -64,14 +64,22 @@
             {% endif %}
 
             {% if request.user.is_authenticated %}
+
+                <li>
+                    <a href="{% url 'password_change' %}">
+                        <i class="fa-solid fa-lock"></i> Change Password
+                    </a>
+                </li>
+
                 <li>
                     <a href="{% url 'logout' %}">
                         <i class="fa-solid fa-right-from-bracket"></i> Logout
                     </a>
                 </li>
+
             {% endif %}
 
-        </ul>
+         </ul>
     </aside>
 
     <!-- ========== MAIN CONTENT ========== -->
