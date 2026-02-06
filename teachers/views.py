@@ -12,14 +12,16 @@ from attendance.models import Attendance, Subject
 
 from .forms import TeacherProfileForm
 
-
 @login_required
 def teacher_dashboard(request):
     # Block students from teacher dashboard
     if not hasattr(request.user, 'teacher'):
         return redirect('student_dashboard')
 
-    subjects = Subject.objects.filter(teacher=request.user.teacher)
+    teacher = request.user.teacher
+
+    # Subjects taught by teacher
+    subjects = Subject.objects.filter(teacher=teacher)
 
     subject_labels = []
     subject_percentages = []
@@ -32,23 +34,29 @@ def teacher_dashboard(request):
         subject_labels.append(subject.name)
         subject_percentages.append(percentage)
 
-    total_attendance = Attendance.objects.filter(
-        subject__teacher=request.user.teacher
-    ).count()
+    # 🔢 TOTAL STUDENTS (distinct students under this teacher)
+    total_students = Attendance.objects.filter(
+        subject__teacher=teacher
+    ).values('student').distinct().count()
 
-    total_present = Attendance.objects.filter(
-        subject__teacher=request.user.teacher,
+    # ✅ PRESENT & ABSENT COUNTS
+    present_count = Attendance.objects.filter(
+        subject__teacher=teacher,
         status=True
     ).count()
 
-    total_absent = total_attendance - total_present
+    absent_count = Attendance.objects.filter(
+        subject__teacher=teacher,
+        status=False
+    ).count()
 
     context = {
         'subjects': subjects,
         'subject_labels': subject_labels,
         'subject_percentages': subject_percentages,
-        'present_count': total_present,
-        'absent_count': total_absent,
+        'total_students': total_students,
+        'present_count': present_count,
+        'absent_count': absent_count,
     }
 
     return render(request, 'teachers/dashboard.html', context)
@@ -113,6 +121,7 @@ def save_attendance(request):
 def view_attendance(request):
     subject_id = request.GET.get('subject')
     date = request.GET.get('date')
+    status = request.GET.get('status')  # 👈 NEW
 
     records = Attendance.objects.filter(
         subject__teacher=request.user.teacher
@@ -124,12 +133,19 @@ def view_attendance(request):
     if date:
         records = records.filter(date=date)
 
+    if status == 'present':
+        records = records.filter(status=True)
+    elif status == 'absent':
+        records = records.filter(status=False)
+
     subjects = Subject.objects.filter(teacher=request.user.teacher)
 
     return render(request, 'teachers/view_attendance.html', {
         'records': records,
         'subjects': subjects,
+        'selected_status': status,
     })
+
 
 
 @login_required

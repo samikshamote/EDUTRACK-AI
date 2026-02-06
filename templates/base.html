@@ -24,6 +24,7 @@
     <!-- ========== SIDEBAR ========== -->
     <aside class="sidebar">
 
+        <!-- College Brand -->
         <div class="college-brand">
             <img src="{% static 'images/kaveri_logo.png' %}" alt="College Logo">
             <h2>Kaveri College</h2>
@@ -32,6 +33,7 @@
 
         <ul class="menu">
 
+            <!-- STUDENT MENU -->
             {% if request.user.is_authenticated and request.user.student %}
                 <li>
                     <a href="{% url 'student_dashboard' %}">
@@ -45,6 +47,7 @@
                 </li>
             {% endif %}
 
+            <!-- TEACHER MENU -->
             {% if request.user.is_authenticated and request.user.teacher %}
                 <li>
                     <a href="{% url 'teacher_dashboard' %}">
@@ -63,23 +66,28 @@
                 </li>
             {% endif %}
 
+            <!-- COMMON OPTIONS -->
             {% if request.user.is_authenticated %}
-
                 <li>
                     <a href="{% url 'password_change' %}">
                         <i class="fa-solid fa-lock"></i> Change Password
                     </a>
                 </li>
 
-                <li>
-                    <a href="{% url 'logout' %}">
-                        <i class="fa-solid fa-right-from-bracket"></i> Logout
-                    </a>
+                <!-- ✅ ONLY WORKING LOGOUT (POST) -->
+                <li class="logout-item">
+                    <form method="POST" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-link">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
                 </li>
 
             {% endif %}
 
-         </ul>
+        </ul>
     </aside>
 
     <!-- ========== MAIN CONTENT ========== -->
@@ -118,7 +126,6 @@
                 : '<i class="fa-solid fa-moon"></i>';
     }
 
-    // Load saved theme
     const savedTheme = localStorage.getItem("theme") || "light";
     setTheme(savedTheme);
 

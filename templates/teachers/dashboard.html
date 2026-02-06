@@ -24,7 +24,7 @@
                 {% endfor %}
             </select>
 
-            <div class="button-group">
+            <div class="button-group align-center">
                 <button type="submit" formaction="{% url 'start_attendance' %}" class="btn primary">
                     <i class="fa-solid fa-video"></i> Start Attendance
                 </button>
@@ -33,6 +33,7 @@
                     <i class="fa-solid fa-floppy-disk"></i> Save Attendance
                 </button>
             </div>
+
         </form>
     </div>
 
@@ -45,6 +46,31 @@
     </div>
 
 </div>
+<div class="cards">
+
+    <!-- TOTAL STUDENTS -->
+    <a href="{% url 'view_attendance' %}" class="card clickable">
+        <h3>Total Students</h3>
+        <h2>{{ total_students }}</h2>
+        <p class="card-hint">View all attendance</p>
+    </a>
+
+    <!-- PRESENT -->
+    <a href="{% url 'view_attendance' %}?status=present" class="card clickable present">
+        <h3>Present</h3>
+        <h2>{{ present_count }}</h2>
+        <p class="card-hint">View present students</p>
+    </a>
+
+    <!-- ABSENT -->
+    <a href="{% url 'view_attendance' %}?status=absent" class="card clickable absent">
+        <h3>Absent</h3>
+        <h2>{{ absent_count }}</h2>
+        <p class="card-hint">View absent students</p>
+    </a>
+
+</div>
+
 
 <!-- ================= CHARTS SECTION ================= -->
 
