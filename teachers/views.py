@@ -14,32 +14,39 @@ from .forms import TeacherProfileForm
 
 @login_required
 def teacher_dashboard(request):
-    # Block students from teacher dashboard
+    # ❌ Block students
     if not hasattr(request.user, 'teacher'):
         return redirect('student_dashboard')
 
     teacher = request.user.teacher
+    today = timezone.now().date()
 
-    # Subjects taught by teacher
+    # 📘 Subjects taught by this teacher
     subjects = Subject.objects.filter(teacher=teacher)
 
-    subject_labels = []
-    subject_percentages = []
+    subject_stats = []
 
     for subject in subjects:
         total = Attendance.objects.filter(subject=subject).count()
         present = Attendance.objects.filter(subject=subject, status=True).count()
+        absent = Attendance.objects.filter(subject=subject, status=False).count()
+
         percentage = int((present / total) * 100) if total > 0 else 0
 
-        subject_labels.append(subject.name)
-        subject_percentages.append(percentage)
+        subject_stats.append({
+            'name': subject.name,
+            'total': total,
+            'present': present,
+            'absent': absent,
+            'percentage': percentage,
+        })
 
-    # 🔢 TOTAL STUDENTS (distinct students under this teacher)
+    # 👨‍🎓 TOTAL STUDENTS (unique)
     total_students = Attendance.objects.filter(
         subject__teacher=teacher
     ).values('student').distinct().count()
 
-    # ✅ PRESENT & ABSENT COUNTS
+    # ✅ PRESENT / ❌ ABSENT (overall)
     present_count = Attendance.objects.filter(
         subject__teacher=teacher,
         status=True
@@ -51,17 +58,14 @@ def teacher_dashboard(request):
     ).count()
 
     context = {
-        'subjects': subjects,
-        'subject_labels': subject_labels,
-        'subject_percentages': subject_percentages,
+        'today': today,
+        'subject_stats': subject_stats,
         'total_students': total_students,
         'present_count': present_count,
         'absent_count': absent_count,
     }
 
     return render(request, 'teachers/dashboard.html', context)
-
-
 @login_required
 def start_attendance(request):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
