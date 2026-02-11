@@ -12,41 +12,47 @@ from attendance.models import Attendance, Subject
 
 from .forms import TeacherProfileForm
 
+from attendance.models import Timetable
+from django.contrib import messages
+from attendance.forms import TimetableForm
+
+from .forms import SubjectForm
+
+
 @login_required
 def teacher_dashboard(request):
-    # ❌ Block students
     if not hasattr(request.user, 'teacher'):
         return redirect('student_dashboard')
 
     teacher = request.user.teacher
-    today = timezone.now().date()
 
-    # 📘 Subjects taught by this teacher
+    # Subjects taught by this teacher
     subjects = Subject.objects.filter(teacher=teacher)
 
-    subject_stats = []
+    subject_labels = []
+    subject_percentages = []
 
     for subject in subjects:
-        total = Attendance.objects.filter(subject=subject).count()
-        present = Attendance.objects.filter(subject=subject, status=True).count()
-        absent = Attendance.objects.filter(subject=subject, status=False).count()
+        total = Attendance.objects.filter(
+            subject=subject,
+            subject__teacher=teacher
+        ).count()
+
+        present = Attendance.objects.filter(
+            subject=subject,
+            subject__teacher=teacher,
+            status=True
+        ).count()
 
         percentage = int((present / total) * 100) if total > 0 else 0
 
-        subject_stats.append({
-            'name': subject.name,
-            'total': total,
-            'present': present,
-            'absent': absent,
-            'percentage': percentage,
-        })
+        subject_labels.append(subject.name)
+        subject_percentages.append(percentage)
 
-    # 👨‍🎓 TOTAL STUDENTS (unique)
     total_students = Attendance.objects.filter(
         subject__teacher=teacher
     ).values('student').distinct().count()
 
-    # ✅ PRESENT / ❌ ABSENT (overall)
     present_count = Attendance.objects.filter(
         subject__teacher=teacher,
         status=True
@@ -58,14 +64,17 @@ def teacher_dashboard(request):
     ).count()
 
     context = {
-        'today': today,
-        'subject_stats': subject_stats,
+        'subjects': subjects,
+        'subject_labels': subject_labels,
+        'subject_percentages': subject_percentages,
         'total_students': total_students,
         'present_count': present_count,
         'absent_count': absent_count,
     }
 
     return render(request, 'teachers/dashboard.html', context)
+
+
 @login_required
 def start_attendance(request):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -217,3 +226,95 @@ def edit_teacher_profile(request):
 
     # 👇 THIS IS WHERE THAT LINE GOES
     return render(request, 'teachers/edit_profile.html', {'form': form})
+
+@login_required
+def manage_timetable(request):
+    if not hasattr(request.user, 'teacher'):
+        return redirect('student_dashboard')
+
+    teacher = request.user.teacher
+
+    if request.method == "POST":
+        form = TimetableForm(request.POST)
+        if form.is_valid():
+            timetable = form.save(commit=False)
+            timetable.teacher = teacher
+            timetable.save()
+            return redirect('manage_timetable')
+    else:
+        form = TimetableForm()
+
+    timetables = Timetable.objects.filter(teacher=teacher)
+
+    return render(request, 'teachers/manage_timetable.html', {
+        'form': form,
+        'timetables': timetables
+    })
+
+@login_required
+def timetable_view(request):
+    if not hasattr(request.user, 'teacher'):
+        return redirect('student_dashboard')
+
+    teacher = request.user.teacher
+
+    subjects = Subject.objects.filter(teacher=teacher)
+
+    return render(request, "teachers/timetable.html", {
+        "subjects": subjects
+    })
+
+
+# ===============================
+# MANAGE SUBJECTS
+# ===============================
+
+@login_required
+def manage_subjects(request):
+    teacher = request.user.teacher
+    subjects = Subject.objects.filter(teacher=teacher)
+
+    if request.method == 'POST':
+        form = SubjectForm(request.POST)
+        if form.is_valid():
+            subject = form.save(commit=False)
+            subject.teacher = teacher   # 🔥 attach teacher
+            subject.save()
+            return redirect('manage_subjects')
+    else:
+        form = SubjectForm()
+
+    return render(request, 'teachers/manage_subjects.html', {
+        'form': form,
+        'subjects': subjects
+    })
+
+
+
+@login_required
+def add_subject(request):
+    if not hasattr(request.user, 'teacher'):
+        return redirect('student_dashboard')
+
+    if request.method == "POST":
+        form = SubjectForm(request.POST)
+        if form.is_valid():
+            subject = form.save(commit=False)
+            subject.teacher = request.user.teacher
+            subject.save()
+
+    return redirect('manage_subjects')
+
+
+@login_required
+def delete_subject(request, subject_id):
+    if not hasattr(request.user, 'teacher'):
+        return redirect('student_dashboard')
+
+    subject = Subject.objects.get(
+        id=subject_id,
+        teacher=request.user.teacher
+    )
+    subject.delete()
+
+    return redirect('manage_subjects')

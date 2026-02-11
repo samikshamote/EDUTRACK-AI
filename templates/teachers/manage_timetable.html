@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Manage Subjects{% endblock %}
+{% block header %}Manage Subjects{% endblock %}
+
+{% block content %}
+
+<h2>Add Subject</h2>
+
+<form method="POST" action="{% url 'add_subject' %}">
+    {% csrf_token %}
+    {{ form.name }}
+    <button type="submit" class="btn primary">Add</button>
+</form>
+
+<hr>
+
+<h2>Your Subjects</h2>
+
+<table class="table">
+    <tr>
+        <th>Subject Name</th>
+        <th>Action</th>
+    </tr>
+
+    {% for subject in subjects %}
+    <tr>
+        <td>{{ subject.name }}</td>
+        <td>
+            <a href="{% url 'delete_subject' subject.id %}" 
+               class="btn danger"
+               onclick="return confirm('Are you sure?')">
+                Delete
+            </a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="2">No subjects added yet.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
