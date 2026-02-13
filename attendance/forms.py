@@ -1,11 +1,14 @@
 from django import forms
-from .models import Timetable
+from .models import Timetable, Subject
 
 class TimetableForm(forms.ModelForm):
     class Meta:
         model = Timetable
         fields = ['subject', 'day', 'period_number', 'start_time', 'end_time']
-        widgets = {
-            'start_time': forms.TimeInput(attrs={'type': 'time'}),
-            'end_time': forms.TimeInput(attrs={'type': 'time'}),
-        }
+
+    def __init__(self, *args, **kwargs):
+        teacher = kwargs.pop('teacher', None)
+        super().__init__(*args, **kwargs)
+
+        if teacher:
+            self.fields['subject'].queryset = Subject.objects.filter(teacher=teacher)

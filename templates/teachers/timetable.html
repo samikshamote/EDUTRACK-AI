@@ -1,0 +1,22 @@
+<h2 style="text-align:center;">Weekly Timetable</h2>
+
+<table border="1" style="width:100%; text-align:center; border-collapse:collapse;">
+    <tr>
+        <th>Time</th>
+        {% for day in days %}
+            <th>{{ day }}</th>
+        {% endfor %}
+    </tr>
+
+    {% for time, row in timetable.items %}
+    <tr>
+        <td>{{ time.0 }} - {{ time.1 }}</td>
+
+        {% for day in days %}
+            <td>
+                {{ row|default_if_none:"" }}
+            </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>

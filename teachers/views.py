@@ -229,20 +229,17 @@ def edit_teacher_profile(request):
 
 @login_required
 def manage_timetable(request):
-    if not hasattr(request.user, 'teacher'):
-        return redirect('student_dashboard')
-
     teacher = request.user.teacher
 
     if request.method == "POST":
-        form = TimetableForm(request.POST)
+        form = TimetableForm(request.POST, teacher=teacher)
         if form.is_valid():
             timetable = form.save(commit=False)
             timetable.teacher = teacher
             timetable.save()
             return redirect('manage_timetable')
     else:
-        form = TimetableForm()
+        form = TimetableForm(teacher=teacher)
 
     timetables = Timetable.objects.filter(teacher=teacher)
 
@@ -251,18 +248,48 @@ def manage_timetable(request):
         'timetables': timetables
     })
 
+
 @login_required
 def timetable_view(request):
-    if not hasattr(request.user, 'teacher'):
-        return redirect('student_dashboard')
 
-    teacher = request.user.teacher
+    # If teacher → show only their timetable
+    if hasattr(request.user, 'teacher'):
+        timetables = Timetable.objects.filter(
+            teacher=request.user.teacher
+        )
+    else:
+        # If student → show all timetable
+        timetables = Timetable.objects.all()
 
-    subjects = Subject.objects.filter(teacher=teacher)
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+
+    # Get unique time slots
+    time_slots = sorted(
+        list(set([(t.start_time, t.end_time) for t in timetables]))
+    )
+
+    timetable_dict = {}
+
+    for start, end in time_slots:
+        timetable_dict[(start, end)] = {}
+        for day in days:
+            entry = timetables.filter(
+                day=day,
+                start_time=start,
+                end_time=end
+            ).first()
+
+            if entry:
+                timetable_dict[(start, end)][day] = f"{entry.subject.name} ({entry.teacher.user.get_full_name()})"
+
+            else:
+                timetable_dict[(start, end)][day] = ""
 
     return render(request, "teachers/timetable.html", {
-        "subjects": subjects
+        "timetable": timetable_dict,
+        "days": days,
     })
+
 
 
 # ===============================

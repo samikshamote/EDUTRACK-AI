@@ -1,43 +1,29 @@
-{% extends 'base.html' %}
-{% block title %}Manage Subjects{% endblock %}
-{% block header %}Manage Subjects{% endblock %}
+<h2>Manage Timetable</h2>
 
-{% block content %}
-
-<h2>Add Subject</h2>
-
-<form method="POST" action="{% url 'add_subject' %}">
+<form method="POST">
     {% csrf_token %}
-    {{ form.name }}
-    <button type="submit" class="btn primary">Add</button>
+    {{ form.as_p }}
+    <button type="submit">Add</button>
 </form>
 
 <hr>
 
-<h2>Your Subjects</h2>
+<h3>Your Timetable</h3>
 
-<table class="table">
+<table border="1">
     <tr>
-        <th>Subject Name</th>
-        <th>Action</th>
+        <th>Subject</th>
+        <th>Day</th>
+        <th>Start</th>
+        <th>End</th>
     </tr>
 
-    {% for subject in subjects %}
+    {% for t in timetables %}
     <tr>
-        <td>{{ subject.name }}</td>
-        <td>
-            <a href="{% url 'delete_subject' subject.id %}" 
-               class="btn danger"
-               onclick="return confirm('Are you sure?')">
-                Delete
-            </a>
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="2">No subjects added yet.</td>
+        <td>{{ t.subject.name }}</td>
+        <td>{{ t.day }}</td>
+        <td>{{ t.start_time }}</td>
+        <td>{{ t.end_time }}</td>
     </tr>
     {% endfor %}
 </table>
-
-{% endblock %}

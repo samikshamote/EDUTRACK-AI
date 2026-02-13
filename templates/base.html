@@ -7,6 +7,8 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 
+    <link rel="icon" href="{% static 'images/kaveri_logo.png' %}">
+
     <!-- Font Awesome -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -22,79 +24,94 @@
 <div class="layout">
 
     <!-- ========== SIDEBAR ========== -->
-    <aside class="sidebar">
+<aside class="sidebar">
 
-        <!-- College Brand -->
-        <div class="college-brand">
-            <img src="{% static 'images/kaveri_logo.png' %}" alt="College Logo">
-            <h2>Kaveri College</h2>
-            <p>Arts, Science & Commerce<br>Pune</p>
-        </div>
+    <!-- College Brand -->
+    <div class="college-brand">
+        <img src="{% static 'images/kaveri_logo.png' %}" alt="College Logo">
+        <h2>Kaveri College</h2>
+        <p>Arts, Science & Commerce<br>Pune</p>
+    </div>
 
-        <ul class="menu">
+    <ul class="menu">
 
-            <!-- STUDENT MENU -->
-            {% if request.user.is_authenticated and request.user.student %}
-                <li>
-                    <a href="{% url 'student_dashboard' %}">
-                        <i class="fa-solid fa-user-graduate"></i> Student Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'student_profile' %}">
-                        <i class="fa-solid fa-id-card"></i> My Profile
-                    </a>
-                </li>
-            {% endif %}
+        <!-- STUDENT MENU -->
+        {% if request.user.is_authenticated and request.user.student %}
+            <li>
+                <a href="{% url 'student_dashboard' %}">
+                    <i class="fa-solid fa-user-graduate"></i>
+                    <span>Student Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'student_profile' %}">
+                    <i class="fa-solid fa-id-card"></i>
+                    <span>My Profile</span>
+                </a>
+            </li>
+        {% endif %}
 
-            <!-- TEACHER MENU -->
-            {% if request.user.is_authenticated and request.user.teacher %}
-                <li>
-                    <a href="{% url 'teacher_dashboard' %}">
-                        <i class="fa-solid fa-chalkboard-user"></i> Teacher Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'view_attendance' %}">
-                        <i class="fa-solid fa-calendar-check"></i> Attendance
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'teacher_profile' %}">
-                        <i class="fa-solid fa-id-card"></i> My Profile
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'manage_timetable' %}">
-                        <i class="fa-solid fa-calendar-days"></i> Timetable
-                    </a>
-                </li>
+        <!-- TEACHER MENU -->
+        {% if request.user.is_authenticated and request.user.teacher %}
+            <li>
+                <a href="{% url 'teacher_dashboard' %}">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                    <span>Teacher Dashboard</span>
+                </a>
+            </li>
 
-            {% endif %}
+            <li>
+                <a href="{% url 'view_attendance' %}">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Attendance</span>
+                </a>
+            </li>
 
-            <!-- COMMON OPTIONS -->
-            {% if request.user.is_authenticated %}
-                <li>
-                    <a href="{% url 'password_change' %}">
-                        <i class="fa-solid fa-lock"></i> Change Password
-                    </a>
-                </li>
+            <li>
+                <a href="{% url 'timetable_view' %}">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Timetable</span>
+                </a>
+            </li>
 
-                <!-- ✅ ONLY WORKING LOGOUT (POST) -->
-                <li class="logout-item">
-                    <form method="POST" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="logout-link">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                            <span>Logout</span>
-                        </button>
-                    </form>
-                </li>
+            <li>
+                <a href="{% url 'manage_timetable' %}">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Manage Timetable</span>
+                </a>
+            </li>
 
-            {% endif %}
+            <li>
+                <a href="{% url 'teacher_profile' %}">
+                    <i class="fa-solid fa-id-card"></i>
+                    <span>My Profile</span>
+                </a>
+            </li>
+        {% endif %}
 
-        </ul>
-    </aside>
+        <!-- COMMON OPTIONS -->
+        {% if request.user.is_authenticated %}
+            <li>
+                <a href="{% url 'password_change' %}">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Change Password</span>
+                </a>
+            </li>
+
+            <li class="logout-item">
+                <form method="POST" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-link">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </li>
+        {% endif %}
+
+    </ul>
+</aside>
+
 
     <!-- ========== MAIN CONTENT ========== -->
     <main class="main-content">
