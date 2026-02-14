@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Subject{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Add New Subject</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label>Subject Name</label>
+            {{ form.name }}
+        </div>
+
+        <div class="form-group">
+            <label>Subject Code</label>
+            {{ form.code }}
+        </div>
+
+        <div class="form-group">
+            <label>Semester</label>
+            {{ form.semester }}
+        </div>
+
+        <button type="submit" class="btn-primary">Add Subject</button>
+    </form>
+</div>
+{% endblock %}

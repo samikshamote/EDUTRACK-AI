@@ -251,17 +251,9 @@ def manage_timetable(request):
 
 @login_required
 def timetable_view(request):
+    timetables = Timetable.objects.select_related('subject', 'teacher')
 
-    # If teacher → show only their timetable
-    if hasattr(request.user, 'teacher'):
-        timetables = Timetable.objects.filter(
-            teacher=request.user.teacher
-        )
-    else:
-        # If student → show all timetable
-        timetables = Timetable.objects.all()
-
-    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
     # Get unique time slots
     time_slots = sorted(
@@ -272,23 +264,24 @@ def timetable_view(request):
 
     for start, end in time_slots:
         timetable_dict[(start, end)] = {}
-        for day in days:
+
+        for day_code, day_name in Timetable.DAYS:
             entry = timetables.filter(
-                day=day,
+                day=day_code,
                 start_time=start,
                 end_time=end
             ).first()
 
             if entry:
-                timetable_dict[(start, end)][day] = f"{entry.subject.name} ({entry.teacher.user.get_full_name()})"
-
+                timetable_dict[(start, end)][day_name] = entry
             else:
-                timetable_dict[(start, end)][day] = ""
+                timetable_dict[(start, end)][day_name] = None
 
     return render(request, "teachers/timetable.html", {
         "timetable": timetable_dict,
-        "days": days,
+        "days": [d[1] for d in Timetable.DAYS],
     })
+
 
 
 
@@ -320,17 +313,15 @@ def manage_subjects(request):
 
 @login_required
 def add_subject(request):
-    if not hasattr(request.user, 'teacher'):
-        return redirect('student_dashboard')
-
     if request.method == "POST":
         form = SubjectForm(request.POST)
         if form.is_valid():
-            subject = form.save(commit=False)
-            subject.teacher = request.user.teacher
-            subject.save()
+            form.save()
+            return redirect('add_subject')
+    else:
+        form = SubjectForm()
 
-    return redirect('manage_subjects')
+    return render(request, 'teachers/add_subject.html', {'form': form})
 
 
 @login_required

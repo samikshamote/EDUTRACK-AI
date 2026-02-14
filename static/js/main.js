@@ -50,3 +50,41 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 });
+
+.timetable-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.timetable-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.timetable-table th {
+    background: #1e293b;
+    color: white;
+    padding: 12px;
+    text-align: center;
+}
+
+.timetable-table td {
+    border: 1px solid #e2e8f0;
+    padding: 15px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.time-col {
+    font-weight: 600;
+    background: #f1f5f9;
+}
+
+.subject-box {
+    background: #e0f2fe;
+    padding: 8px;
+    border-radius: 6px;
+}

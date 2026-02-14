@@ -16,6 +16,7 @@ urlpatterns = [
 
     path('manage-timetable/', views.manage_timetable, name='manage_timetable'),
     path('timetable/', views.timetable_view, name='timetable_view'),
+
 ]
 
 

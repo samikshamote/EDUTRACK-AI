@@ -11,7 +11,7 @@ class TeacherProfileForm(forms.ModelForm):
 class SubjectForm(forms.ModelForm):
     class Meta:
         model = Subject
-        fields = ['name']
+        fields = ['name', 'code', 'semester']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
