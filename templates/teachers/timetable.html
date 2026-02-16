@@ -1,49 +1,46 @@
 {% extends 'base.html' %}
-{% load timetable_extra %}
-
 {% block title %}Timetable{% endblock %}
 {% block header %}College Timetable{% endblock %}
 
 {% block content %}
 
-<div class="timetable-container">
+<h2 class="mb-4">College Timetable</h2>
 
-    <table class="timetable-table">
-        <thead>
-            <tr>
-                <th>Time</th>
-                {% for day in days %}
-                    <th>{{ day }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
+<table class="table table-bordered text-center">
+    <thead class="table-dark">
+        <tr>
+            <th>Time</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+        </tr>
+    </thead>
 
-        <tbody>
-            {% for time, row in timetable.items %}
-            <tr>
-                <td class="time-col">
-                    {{ time.0 }} - {{ time.1 }}
-                </td>
+    <tbody>
+        {% for slot in timetable_slots %}
+        <tr>
+            <td class="fw-bold">
+                {{ slot.start_time|time:"g:i A" }} -
+                {{ slot.end_time|time:"g:i A" }}
+            </td>
 
-                {% for day in days %}
-                <td>
-                    {% if row|get_item:day %}
-                        <div class="subject-box">
-                            <strong>{{ row|get_item:day.subject.name }}</strong><br>
-                            <small>{{ row|get_item:day.teacher.user.username }}</small>
-                        </div>
-                    {% else %}
-                        -
+            {% for day in days %}
+            <td>
+                {% for entry in timetable %}
+                    {% if entry.day == day and entry.start_time == slot.start_time %}
+                        <strong>{{ entry.subject.name }}</strong><br>
+                        <small>{{ entry.subject.teacher.user.get_full_name }}</small>
                     {% endif %}
-                </td>
                 {% endfor %}
-            </tr>
+            </td>
             {% endfor %}
-        </tbody>
+        </tr>
+        {% endfor %}
+    </tbody>
 
-    </table>
-
-</div>
+</table>
 
 {% endblock %}
-

@@ -16,6 +16,9 @@ urlpatterns = [
 
     path('manage-timetable/', views.manage_timetable, name='manage_timetable'),
     path('timetable/', views.timetable_view, name='timetable_view'),
+    path("delete-timetable/<int:pk>/", views.delete_timetable_entry, name="delete_timetable"),
+    path("edit-timetable/<int:pk>/", views.edit_timetable_entry, name="edit_timetable"),
+    path("delete-all-timetable/", views.delete_all_timetable, name="delete_all_timetable"),
 
 ]
 

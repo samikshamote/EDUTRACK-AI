@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -13,13 +14,18 @@ class Teacher(models.Model):
         filled = 0
         total = 4
 
-        if self.user.first_name: filled += 1
-        if self.user.email: filled += 1
-        if self.phone: filled += 1
-        if self.photo: filled += 1
+        if self.user.first_name:
+            filled += 1
+        if self.user.email:
+            filled += 1
+        if self.phone:
+            filled += 1
+        if self.photo:
+            filled += 1
 
         return int((filled / total) * 100)
 
     def __str__(self):
         return self.user.username
+
 

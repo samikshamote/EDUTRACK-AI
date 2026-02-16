@@ -3,7 +3,7 @@ from .models import Attendance, Subject
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ('student', 'subject', 'date', 'time', 'status')
+    list_display = ('student', 'subject', 'date',  'status')
     list_filter = ('subject', 'date', 'status')
     search_fields = ('student__user__username',)
 

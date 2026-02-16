@@ -1,29 +1,125 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+.btn-primary { background:#2563eb; color:white; padding:8px 15px; border:none; border-radius:6px;}
+.btn-danger { background:#dc2626; color:white; padding:6px 12px; border:none; border-radius:6px;}
+.btn-warning { background:#f59e0b; color:white; padding:6px 12px; border:none; border-radius:6px;}
+table { width:100%; border-collapse: collapse; margin-top:20px;}
+th { background:#1e293b; color:white; padding:12px;}
+td { padding:10px; text-align:center; border-bottom:1px solid #ddd;}
+tr:hover { background:#f1f5f9;}
+</style>
+
+<div class="card">
+
 <h2>Manage Timetable</h2>
 
-<form method="POST">
+<form method="POST" style="margin-top:20px;">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Add</button>
+
+    <p>
+        {{ form.subject.label_tag }}<br>
+        {{ form.subject }}
+    </p>
+
+    <p>
+        {{ form.day.label_tag }}<br>
+        {{ form.day }}
+    </p>
+
+    <p>
+        {{ form.period_number.label_tag }}<br>
+        {{ form.period_number }}
+    </p>
+
+    <p>
+        {{ form.start_time.label_tag }}<br>
+        {{ form.start_time }}
+    </p>
+
+    <p>
+        {{ form.end_time.label_tag }}<br>
+        {{ form.end_time }}
+    </p>
+
+    <p>
+        {{ form.batch.label_tag }}<br>
+        {{ form.batch }}
+        <small style="color:gray;">(Select only for practical subjects)</small>
+    </p>
+
+    <button type="submit" class="btn-primary">Add Entry</button>
 </form>
 
 <hr>
 
-<h3>Your Timetable</h3>
+<h3>Your Entries</h3>
 
-<table border="1">
-    <tr>
-        <th>Subject</th>
-        <th>Day</th>
-        <th>Start</th>
-        <th>End</th>
-    </tr>
+<table>
+    <thead>
+        <tr>
+            <th>Subject</th>
+            <th>Day</th>
+            <th>Batch</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in timetable %}
+        <tr>
+            <td>{{ entry.subject.name }}</td>
+            <td>{{ entry.get_day_display }}</td>
 
-    {% for t in timetables %}
-    <tr>
-        <td>{{ t.subject.name }}</td>
-        <td>{{ t.day }}</td>
-        <td>{{ t.start_time }}</td>
-        <td>{{ t.end_time }}</td>
-    </tr>
-    {% endfor %}
+            <td>
+                {% if entry.batch %}
+                    {{ entry.batch }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+
+            <td>{{ entry.start_time }}</td>
+            <td>{{ entry.end_time }}</td>
+            <td>
+                <a href="{% url 'edit_timetable' entry.id %}" class="btn-warning">Edit</a>
+
+                <form method="POST" action="{% url 'delete_timetable' entry.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-danger"
+                        onclick="return confirm('Are you sure you want to delete this entry?')">
+                        Delete
+                    </button>
+                </form>
+            </td>
+        </tr>
+
+        {% empty %}
+        <tr>
+            <td colspan="6">No entries found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+
+<br>
+
+<form method="POST" action="{% url 'delete_all_timetable' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn-danger"
+        onclick="return confirm('Delete ALL timetable entries? This cannot be undone.')">
+        Delete All Entries
+    </button>
+</form>
+
+</div>
+
+{% endblock %}

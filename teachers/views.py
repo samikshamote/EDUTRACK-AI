@@ -14,9 +14,13 @@ from .forms import TeacherProfileForm
 
 from attendance.models import Timetable
 from django.contrib import messages
-from attendance.forms import TimetableForm
+from .forms import TimetableForm
 
 from .forms import SubjectForm
+from teachers.models import Teacher
+
+from django.db.models import F
+from django.shortcuts import get_object_or_404, redirect
 
 
 @login_required
@@ -241,47 +245,36 @@ def manage_timetable(request):
     else:
         form = TimetableForm(teacher=teacher)
 
-    timetables = Timetable.objects.filter(teacher=teacher)
+    timetables = Timetable.objects.filter(
+        teacher=teacher
+    ).order_by("day", "start_time")
 
-    return render(request, 'teachers/manage_timetable.html', {
-        'form': form,
-        'timetables': timetables
+    return render(request, "teachers/manage_timetable.html", {
+        "form": form,
+        "timetable": timetables
     })
+
 
 
 @login_required
 def timetable_view(request):
-    timetables = Timetable.objects.select_related('subject', 'teacher')
 
-    days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    timetable = Timetable.objects.select_related("subject").order_by("start_time")
 
-    # Get unique time slots
-    time_slots = sorted(
-        list(set([(t.start_time, t.end_time) for t in timetables]))
+    timetable_slots = (
+        Timetable.objects
+        .order_by("start_time")
+        .values("start_time", "end_time")
+        .distinct()
     )
 
-    timetable_dict = {}
-
-    for start, end in time_slots:
-        timetable_dict[(start, end)] = {}
-
-        for day_code, day_name in Timetable.DAYS:
-            entry = timetables.filter(
-                day=day_code,
-                start_time=start,
-                end_time=end
-            ).first()
-
-            if entry:
-                timetable_dict[(start, end)][day_name] = entry
-            else:
-                timetable_dict[(start, end)][day_name] = None
+    days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
     return render(request, "teachers/timetable.html", {
-        "timetable": timetable_dict,
-        "days": [d[1] for d in Timetable.DAYS],
+        "timetable": timetable,
+        "timetable_slots": timetable_slots,
+        "days": days,
     })
-
 
 
 
@@ -309,10 +302,9 @@ def manage_subjects(request):
         'subjects': subjects
     })
 
-
-
 @login_required
 def add_subject(request):
+
     if request.method == "POST":
         form = SubjectForm(request.POST)
         if form.is_valid():
@@ -321,7 +313,9 @@ def add_subject(request):
     else:
         form = SubjectForm()
 
-    return render(request, 'teachers/add_subject.html', {'form': form})
+    return render(request, 'teachers/add_subject.html', {
+        'form': form
+    })
 
 
 @login_required
@@ -336,3 +330,34 @@ def delete_subject(request, subject_id):
     subject.delete()
 
     return redirect('manage_subjects')
+
+@login_required
+def delete_timetable_entry(request, pk):
+    entry = get_object_or_404(Timetable, pk=pk)
+    entry.delete()
+    messages.success(request, "Timetable entry deleted successfully.")
+    return redirect("manage_timetable")
+
+@login_required
+def delete_all_timetable(request):
+    if request.method == "POST":
+        Timetable.objects.all().delete()
+        messages.success(request, "All timetable entries deleted successfully.")
+    return redirect("manage_timetable")
+
+@login_required
+def edit_timetable_entry(request, pk):
+    entry = get_object_or_404(Timetable, pk=pk)
+
+    if request.method == "POST":
+        form = TimetableForm(request.POST, instance=entry, teacher=request.user.teacher)
+
+        if form.is_valid():
+            form.save()
+            return redirect("manage_timetable")
+    else:
+        form = TimetableForm(instance=entry, teacher=request.user.teacher)
+
+    return render(request, "teachers/edit_timetable.html", {
+        "form": form
+    })

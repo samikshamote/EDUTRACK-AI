@@ -27,3 +27,16 @@ class Student(models.Model):
 
     def __str__(self):
         return self.user.username
+
+BATCH_CHOICES = [
+    ('B-I', 'Batch I'),
+    ('B-II', 'Batch II'),
+    ('B-III', 'Batch III'),
+]
+
+batch = models.CharField(
+    max_length=10,
+    choices=BATCH_CHOICES,
+    null=True,
+    blank=True
+)

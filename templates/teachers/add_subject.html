@@ -8,7 +8,7 @@
 
     <form method="POST">
         {% csrf_token %}
-        
+       
         <div class="form-group">
             <label>Subject Name</label>
             {{ form.name }}
@@ -22,6 +22,12 @@
         <div class="form-group">
             <label>Semester</label>
             {{ form.semester }}
+        </div>
+
+        <!-- ✅ ADD THIS BLOCK -->
+        <div class="form-group">
+            <label>Teacher</label>
+            {{ form.teacher }}
         </div>
 
         <button type="submit" class="btn-primary">Add Subject</button>
