@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Pending Student Approvals</h2>
+
+<table border="1" cellpadding="10" width="100%">
+    <tr>
+        <th>Name</th>
+        <th>Roll No</th>
+        <th>Batch</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for student in pending_students %}
+    <tr>
+        <td>{{ student.user.username }}</td>
+        <td>{{ student.roll_number }}</td>
+        <td>{{ student.batch }}</td>
+        <td>
+            <a href="{% url 'approve_student' student.id %}" style="color:green;">
+                Approve
+            </a>
+
+            |
+
+            <a href="{% url 'reject_student' student.id %}" style="color:red;">
+                Reject
+            </a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">No pending students</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

@@ -17,6 +17,7 @@ urlpatterns = [
     path('students/', include('students.urls')),
     path('teachers/', include('teachers.urls')),
     path('logout/', LogoutView.as_view(), name='logout'),
+
 ]
 
 # Serve media files (profile photos etc.) in development

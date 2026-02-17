@@ -5,6 +5,9 @@ import os
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+
+from students.models import Student
+from django.shortcuts import render, redirect, get_object_or_404
 import csv
 
 from students.models import Student
@@ -14,13 +17,23 @@ from .forms import TeacherProfileForm
 
 from attendance.models import Timetable
 from django.contrib import messages
-from .forms import TimetableForm
+from attendance.forms import TimetableForm
 
 from .forms import SubjectForm
 from teachers.models import Teacher
 
 from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect
+
+from attendance.models import Attendance
+from attendance.models import Subject
+from django.shortcuts import render
+
+
+import qrcode
+from django.http import HttpResponse
+from io import BytesIO
+
 
 
 @login_required
@@ -30,54 +43,43 @@ def teacher_dashboard(request):
 
     teacher = request.user.teacher
 
-    # Subjects taught by this teacher
+    # 🔥 Get all attendance linked through timetable
+    attendance_qs = Attendance.objects.filter(
+        timetable__teacher=teacher
+    )
+
+    # ✅ Correct Counts
+    total_students = attendance_qs.values('student').distinct().count()
+    present_count = attendance_qs.filter(status=True).count()
+    absent_count = attendance_qs.filter(status=False).count()
+
+    # 🔥 Subject-wise percentage
     subjects = Subject.objects.filter(teacher=teacher)
 
     subject_labels = []
     subject_percentages = []
 
     for subject in subjects:
-        total = Attendance.objects.filter(
-            subject=subject,
-            subject__teacher=teacher
-        ).count()
+        subject_attendance = attendance_qs.filter(subject=subject)
 
-        present = Attendance.objects.filter(
-            subject=subject,
-            subject__teacher=teacher,
-            status=True
-        ).count()
+        total = subject_attendance.count()
+        present = subject_attendance.filter(status=True).count()
 
         percentage = int((present / total) * 100) if total > 0 else 0
 
         subject_labels.append(subject.name)
         subject_percentages.append(percentage)
 
-    total_students = Attendance.objects.filter(
-        subject__teacher=teacher
-    ).values('student').distinct().count()
-
-    present_count = Attendance.objects.filter(
-        subject__teacher=teacher,
-        status=True
-    ).count()
-
-    absent_count = Attendance.objects.filter(
-        subject__teacher=teacher,
-        status=False
-    ).count()
-
     context = {
-        'subjects': subjects,
-        'subject_labels': subject_labels,
-        'subject_percentages': subject_percentages,
         'total_students': total_students,
         'present_count': present_count,
         'absent_count': absent_count,
+        'subjects': subjects,
+        'subject_labels': subject_labels,
+        'subject_percentages': subject_percentages,
     }
 
     return render(request, 'teachers/dashboard.html', context)
-
 
 @login_required
 def start_attendance(request):
@@ -134,15 +136,22 @@ def save_attendance(request):
     return HttpResponse("✅ Attendance saved successfully")
 
 
+
+
 @login_required
 def view_attendance(request):
-    subject_id = request.GET.get('subject')
-    date = request.GET.get('date')
-    status = request.GET.get('status')  # 👈 NEW
+    teacher = request.user.teacher
 
+    subjects = Subject.objects.filter(teacher=teacher)
+
+    # 🔥 IMPORTANT FIX
     records = Attendance.objects.filter(
-        subject__teacher=request.user.teacher
-    )
+        timetable__teacher=teacher
+    ).select_related("student", "subject", "timetable").order_by("-id")
+
+    # Filtering
+    subject_id = request.GET.get("subject")
+    date = request.GET.get("date")
 
     if subject_id:
         records = records.filter(subject_id=subject_id)
@@ -150,17 +159,9 @@ def view_attendance(request):
     if date:
         records = records.filter(date=date)
 
-    if status == 'present':
-        records = records.filter(status=True)
-    elif status == 'absent':
-        records = records.filter(status=False)
-
-    subjects = Subject.objects.filter(teacher=request.user.teacher)
-
-    return render(request, 'teachers/view_attendance.html', {
-        'records': records,
-        'subjects': subjects,
-        'selected_status': status,
+    return render(request, "teachers/view_attendance.html", {
+        "records": records,
+        "subjects": subjects
     })
 
 
@@ -219,17 +220,27 @@ def teacher_profile(request):
 @login_required
 def edit_teacher_profile(request):
     teacher = request.user.teacher
+    user = request.user  # 🔥 get Django User
 
     if request.method == 'POST':
         form = TeacherProfileForm(request.POST, request.FILES, instance=teacher)
+
         if form.is_valid():
             form.save()
+
+            # 🔥 Save email to Django User model
+            user.email = request.POST.get("email")
+            user.save()
+
+            messages.success(request, "Profile updated successfully!")
             return redirect('teacher_profile')
     else:
         form = TeacherProfileForm(instance=teacher)
 
-    # 👇 THIS IS WHERE THAT LINE GOES
-    return render(request, 'teachers/edit_profile.html', {'form': form})
+    return render(request, 'teachers/edit_profile.html', {
+        'form': form,
+        'user': user  # 🔥 pass user to template
+    })
 
 @login_required
 def manage_timetable(request):
@@ -361,3 +372,116 @@ def edit_timetable_entry(request, pk):
     return render(request, "teachers/edit_timetable.html", {
         "form": form
     })
+
+@login_required
+def take_attendance_now(request):
+    teacher = request.user.teacher
+
+    now = timezone.localtime()
+    today_day = now.strftime("%a")
+    current_time = now.time()
+    today_date = now.date()   # 🔥 ADD THIS
+
+    timetable_entry = Timetable.objects.filter(
+        teacher=teacher,
+        day=today_day,
+        start_time__lte=current_time,
+        end_time__gte=current_time
+    ).select_related("subject").first()
+
+    if not timetable_entry:
+        return HttpResponse("❌ No class scheduled right now.")
+
+    subject = timetable_entry.subject
+    batch = timetable_entry.batch
+
+    # Run recognition and WAIT
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    script_path = os.path.join(base_dir, "face_recognition_engine", "recognize.py")
+
+    subprocess.run([sys.executable, script_path])
+
+    file_path = os.path.join(base_dir, "face_recognition_engine", "recognized_today.txt")
+
+    if not os.path.exists(file_path):
+        return HttpResponse("❌ No attendance data found.")
+
+    with open(file_path, "r") as f:
+        names = f.read().splitlines()
+
+    # 🔥 Batch logic
+    if batch:
+        students = Student.objects.filter(batch=batch)
+    else:
+        students = Student.objects.all()
+
+    print("Recognized Names:", names)
+    print("Total Students in Batch:", students.count())
+
+    for student in students:
+        status = student.user.username in names
+
+        # ✅ FIXED: include date to avoid conflicts
+        Attendance.objects.update_or_create(
+            student=student,
+            timetable=timetable_entry,
+            date=today_date,   # 🔥 VERY IMPORTANT
+            defaults={
+                "subject": subject,
+                "status": status
+            }
+        )
+
+    # Clear file after saving
+    open(file_path, "w").close()
+
+    return HttpResponse("✅ Attendance completed and saved successfully.")
+
+
+
+
+@login_required
+def approve_students(request):
+    pending_students = Student.objects.filter(is_approved=False, is_rejected=False)
+
+    return render(request, 'teachers/approve_students.html', {
+        'pending_students': pending_students
+    })
+
+@login_required
+def approve_student(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+
+    student.is_approved = True
+    student.user.is_active = True
+
+    student.user.save()
+    student.save()
+
+    return redirect('approve_students')
+
+
+@login_required
+def reject_student(request, student_id):
+    student = get_object_or_404(Student, id=student_id)
+
+    student.is_rejected = True
+    student.user.is_active = False
+
+    student.user.save()
+    student.save()
+
+    return redirect('approve_students')
+
+
+@login_required
+def generate_registration_qr(request):
+    registration_url = request.build_absolute_uri('/students/register/')
+
+    qr = qrcode.make(registration_url)
+
+    buffer = BytesIO()
+    qr.save(buffer, format='PNG')
+
+    return HttpResponse(buffer.getvalue(), content_type="image/png")
+

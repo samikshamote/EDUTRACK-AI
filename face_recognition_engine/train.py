@@ -1,51 +1,43 @@
-import os
-import cv2
 import face_recognition
+import os
 import pickle
 
-dataset_path = "."
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATASET_PATH = os.path.join(BASE_DIR, "face_recognition_engine", "dataset")
 
-encodings = []
-names = []
+known_encodings = []
+known_names = []
 
-print("Starting training...")
+for student_name in os.listdir(DATASET_PATH):
 
-for student_name in os.listdir(dataset_path):
-    student_path = os.path.join(dataset_path, student_name)
+    student_folder = os.path.join(DATASET_PATH, student_name)
 
-    if not os.path.isdir(student_path):
+    if not os.path.isdir(student_folder):
         continue
 
-    print(f"Processing folder: {student_name}")
+    for image_name in os.listdir(student_folder):
 
-    for img_name in os.listdir(student_path):
-        img_path = os.path.join(student_path, img_name)
-
-        image = cv2.imread(img_path)
-        if image is None:
+        # ✅ Only allow image files
+        if not image_name.lower().endswith((".jpg", ".jpeg", ".png", ".jfif")):
             continue
 
-        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image_path = os.path.join(student_folder, image_name)
 
-        boxes = face_recognition.face_locations(rgb)
+        print("Processing:", image_path)
 
-        if len(boxes) == 0:
-            print(f"⚠ No face detected in: {img_name}")
-            continue
+        image = face_recognition.load_image_file(image_path)
+        encodings = face_recognition.face_encodings(image)
 
-        encoding = face_recognition.face_encodings(rgb, boxes)[0]
+        if len(encodings) > 0:
+            known_encodings.append(encodings[0])
+            known_names.append(student_name)
 
-        encodings.append(encoding)
-        names.append(student_name)
+data = {
+    "encodings": known_encodings,
+    "names": known_names
+}
 
-        print(f"✔ Encoded: {img_name}")
+with open(os.path.join(BASE_DIR, "face_recognition_engine", "encodings.pkl"), "wb") as f:
+    pickle.dump(data, f)
 
-# Save encodings
-with open("encodings.pkl", "wb") as f:
-    pickle.dump(
-        {"encodings": encodings, "names": names},
-        f
-    )
-
-print("\nTraining Complete!")
-print("Encodings saved in encodings.pkl")
+print("✅ Training completed successfully")

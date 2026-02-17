@@ -57,3 +57,43 @@ def edit_student_profile(request):
         form = StudentProfileForm(instance=student)
 
     return render(request, 'students/edit_profile.html', {'form': form})
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.contrib import messages
+from .forms import StudentRegistrationForm
+
+
+def student_register(request):
+    if request.method == "POST":
+        form = StudentRegistrationForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "Username already exists")
+                return redirect('student_register')
+
+            # 🔥 Create user but inactive
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                is_active=False
+            )
+
+            student = form.save(commit=False)
+            student.user = user
+            student.is_approved = False
+            student.save()
+
+            messages.success(request, "Registration submitted. Wait for teacher approval.")
+            return redirect('login')
+
+    else:
+        form = StudentRegistrationForm()
+
+    return render(request, 'students/register.html', {'form': form})

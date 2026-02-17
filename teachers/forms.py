@@ -6,6 +6,9 @@ from attendance.models import Timetable
 # -----------------------------
 # Teacher Profile Form
 # -----------------------------
+# -----------------------------
+# Teacher Profile Form
+# -----------------------------
 class TeacherProfileForm(forms.ModelForm):
     class Meta:
         model = Teacher

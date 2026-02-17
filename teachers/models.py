@@ -8,7 +8,8 @@ class Teacher(models.Model):
     photo = models.ImageField(upload_to='profiles/teachers/', blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True)
     qualification = models.CharField(max_length=100, blank=True)
-
+    email = models.EmailField(blank=True) 
+    
     @property
     def profile_completion(self):
         filled = 0

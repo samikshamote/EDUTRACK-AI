@@ -19,6 +19,12 @@ urlpatterns = [
     path("delete-timetable/<int:pk>/", views.delete_timetable_entry, name="delete_timetable"),
     path("edit-timetable/<int:pk>/", views.edit_timetable_entry, name="edit_timetable"),
     path("delete-all-timetable/", views.delete_all_timetable, name="delete_all_timetable"),
+    path('take-attendance-now/', views.take_attendance_now, name='take_attendance_now'),
+    path('approve-students/', views.approve_students, name='approve_students'),
+    path('approve-student/<int:student_id>/', views.approve_student, name='approve_student'),
+    path('reject-student/<int:student_id>/', views.reject_student, name='reject_student'),
+    path('registration-qr/', views.generate_registration_qr, name='registration_qr'),
+
 
 ]
 

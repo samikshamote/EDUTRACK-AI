@@ -23,9 +23,19 @@
                 {% endif %}
             </div>
 
-            <!-- Form Fields -->
             <div class="form-grid">
+
+                <!-- 🔥 EMAIL FIELD -->
+                <div>
+                    <label>Email</label>
+                    <input type="email" name="email"
+                           value="{{ request.user.email }}"
+                           class="form-control"
+                           placeholder="Enter your email">
+                </div>
+
                 {{ form.as_p }}
+
             </div>
 
             <!-- Buttons -->
@@ -34,7 +44,7 @@
                     💾 Save Changes
                 </button>
 
-                <a href="javascript:history.back()" class="btn outline">
+                <a href="{% url 'teacher_profile' %}" class="btn outline">
                     ❌ Cancel
                 </a>
             </div>

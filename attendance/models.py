@@ -11,6 +11,7 @@ class Subject(models.Model):
     code = models.CharField(max_length=20, unique=True)
     semester = models.IntegerField(default=1)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    batch = models.CharField(max_length=10, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} ({self.code})"

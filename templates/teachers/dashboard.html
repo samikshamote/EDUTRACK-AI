@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block title %}Teacher Dashboard{% endblock %}
 {% block header %}Teacher Dashboard{% endblock %}
 
@@ -16,25 +15,23 @@
     <div class="action-card">
         <h3><i class="fa-solid fa-camera"></i> Attendance Management</h3>
 
-        <form method="get">
-            <select name="subject_id" class="subject-select" required>
-                <option value="">-- Select Subject --</option>
-                {% for subject in subjects %}
-                    <option value="{{ subject.id }}">{{ subject.name }}</option>
-                {% endfor %}
-            </select>
+        <div class="button-group align-center">
 
-            <div class="button-group align-center">
-                <button type="submit" formaction="{% url 'start_attendance' %}" class="btn primary">
-                    <i class="fa-solid fa-video"></i> Start Attendance
-                </button>
+            <!-- Take Attendance -->
+            <a href="{% url 'take_attendance_now' %}" class="btn primary">
+                <i class="fa-solid fa-clock"></i> Take Attendance (Auto by Timetable)
+            </a>
 
-                <button type="submit" formaction="{% url 'save_attendance' %}" class="btn success">
-                    <i class="fa-solid fa-floppy-disk"></i> Save Attendance
-                </button>
-            </div>
+            <!-- 🔥 QR Registration Button -->
+            <a href="{% url 'registration_qr' %}" target="_blank" class="btn secondary">
+                <i class="fa-solid fa-qrcode"></i> Generate Registration QR
+            </a>
 
-        </form>
+        </div>
+
+        <p style="margin-top:15px; font-size:14px; color:gray;">
+            Attendance will be taken automatically based on today's timetable and current time.
+        </p>
     </div>
 
     <!-- Reports -->
@@ -45,7 +42,20 @@
         </a>
     </div>
 
+    <!-- Student Approval -->
+    <div class="action-card warning">
+        <h3><i class="fa-solid fa-user-check"></i> Student Approvals</h3>
+
+        <a href="{% url 'approve_students' %}" class="btn warning">
+            <i class="fa-solid fa-check"></i> Approve / Reject Students
+        </a>
+    </div>
+
 </div>
+
+
+<!-- ================= SUMMARY CARDS ================= -->
+
 <div class="cards">
 
     <!-- TOTAL STUDENTS -->
@@ -76,11 +86,13 @@
 
 <div class="dashboard-section" style="margin-top:30px;">
 
+    <!-- Attendance Overview -->
     <div class="action-card">
         <h3><i class="fa-solid fa-chart-pie"></i> Attendance Overview</h3>
         <canvas id="attendanceChart"></canvas>
     </div>
 
+    <!-- Subject-wise Attendance -->
     <div class="action-card">
         <h3><i class="fa-solid fa-chart-line"></i> Subject-wise Attendance</h3>
         <canvas id="subjectChart"></canvas>
@@ -88,19 +100,61 @@
 
 </div>
 
-<!-- PASS DJANGO DATA TO JS -->
-<script>
-    const PRESENT_COUNT = {{ present_count }};
-    const ABSENT_COUNT = {{ absent_count }};
-    const SUBJECT_LABELS = {{ subject_labels|safe }};
-    const SUBJECT_PERCENTAGES = {{ subject_percentages|safe }};
-</script>
 
-<!-- Chart.js CDN -->
+<!-- ================= CHART JS ================= -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Your external JS -->
-<script src="{% static 'js/main.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
+    const presentCount = {{ present_count|default:0 }};
+    const absentCount = {{ absent_count|default:0 }};
+    const subjectLabels = {{ subject_labels|safe|default:"[]" }};
+    const subjectPercentages = {{ subject_percentages|safe|default:"[]" }};
+
+    // PIE CHART
+    const ctx1 = document.getElementById('attendanceChart');
+    if (ctx1) {
+        new Chart(ctx1, {
+            type: 'pie',
+            data: {
+                labels: ['Present', 'Absent'],
+                datasets: [{
+                    data: [presentCount, absentCount],
+                    backgroundColor: ['#4CAF50', '#F44336']
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+
+    // BAR CHART
+    const ctx2 = document.getElementById('subjectChart');
+    if (ctx2) {
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: subjectLabels,
+                datasets: [{
+                    label: 'Attendance %',
+                    data: subjectPercentages,
+                    backgroundColor: '#2196F3'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+
+});
+</script>
 
 {% endblock %}

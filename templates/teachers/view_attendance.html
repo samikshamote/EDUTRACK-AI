@@ -41,7 +41,7 @@
         <td>{{ a.student.user.username }}</td>
         <td>{{ a.subject.name }}</td>
         <td>{{ a.date }}</td>
-        <td>{{ a.time }}</td>
+        <td>{{ a.timetable.start_time }} - {{ a.timetable.end_time }}</td>
         <td>
             {% if a.status %}
                 <span style="color:green;">Present</span>

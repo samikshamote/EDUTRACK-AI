@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Take Attendance</h2>
+
+<p><strong>Subject:</strong> {{ timetable.subject.name }}</p>
+<p><strong>Batch:</strong> 
+    {% if timetable.batch %}
+        {{ timetable.batch }}
+    {% else %}
+        All Students
+    {% endif %}
+</p>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <table>
+        <tr>
+            <th>Roll No</th>
+            <th>Name</th>
+            <th>Status</th>
+        </tr>
+
+        {% for student in students %}
+        <tr>
+            <td>{{ student.roll_number }}</td>
+            <td>{{ student.user.username }}</td>
+            <td>
+                <select name="status_{{ student.id }}">
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                </select>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <button type="submit">Save Attendance</button>
+</form>
+
+{% endblock %}

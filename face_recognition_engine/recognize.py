@@ -3,16 +3,16 @@ import face_recognition
 import pickle
 import numpy as np
 import os
+import time
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 ENCODINGS_PATH = os.path.join(BASE_DIR, "face_recognition_engine", "encodings.pkl")
 RECOGNIZED_FILE = os.path.join(BASE_DIR, "face_recognition_engine", "recognized_today.txt")
 
-# Ensure recognized file exists and is cleared
+# Clear file at start
 open(RECOGNIZED_FILE, "w").close()
 
-# Load encodings
 with open(ENCODINGS_PATH, "rb") as f:
     data = pickle.load(f)
 
@@ -35,6 +35,9 @@ def mark_attendance(name):
         print(f"✔ Recognized: {name}")
 
 video = cv2.VideoCapture(0)
+
+start_time = time.time()
+DURATION = 20   # 🔥 Camera runs for 20 seconds only
 
 while True:
     ret, frame = video.read()
@@ -61,8 +64,14 @@ while True:
 
     cv2.imshow("Smart Attendance", frame)
 
+    # 🔥 Auto close after 20 seconds
+    if time.time() - start_time > DURATION:
+        break
+
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
 video.release()
 cv2.destroyAllWindows()
+
+print("✅ Camera closed automatically")
