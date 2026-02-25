@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}My Timetable{% endblock %}
+{% block header %}My Timetable{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">My Timetable</h2>
+
+<table class="table table-bordered text-center">
+    <thead class="table-dark">
+        <tr>
+            <th>Time</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for slot in timetable_slots %}
+<tr>
+    <td class="fw-bold">
+        {{ slot.0|time:"g:i A" }} -
+        {{ slot.1|time:"g:i A" }}
+    </td>
+
+    {% for day in days %}
+    <td>
+        {% for entry in timetable %}
+            {% if entry.day == day and entry.start_time == slot.0 %}
+                <strong>{{ entry.subject.name }}</strong><br>
+                <small>{{ entry.subject.teacher.user.get_full_name }}</small>
+            {% endif %}
+        {% endfor %}
+    </td>
+    {% endfor %}
+</tr>
+{% endfor %}
+    </tbody>
+
+</table>
+
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.db import models
-from teachers.models import Teacher
+#from teachers.models import Teacher
 from students.models import Student
 
 
@@ -10,7 +10,7 @@ class Subject(models.Model):
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20, unique=True)
     semester = models.IntegerField(default=1)
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    teacher = models.ForeignKey("teachers.Teacher", on_delete=models.CASCADE)
     batch = models.CharField(max_length=10, blank=True, null=True)
 
     def __str__(self):
@@ -37,7 +37,7 @@ class Timetable(models.Model):
         ('B-III', 'Batch III'),
     ]
 
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    teacher = models.ForeignKey("teachers.Teacher", on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
 
     day = models.CharField(max_length=3, choices=DAYS)
@@ -86,3 +86,5 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.student.user.username} - {self.subject.name} - {self.date}"
+
+

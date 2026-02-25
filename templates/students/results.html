@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-container">
+
+<h2>Student Result Report</h2>
+
+{% if subject_results %}
+
+<table border="1" cellpadding="10" width="100%">
+    <tr>
+        <th>Subject</th>
+        <th>Attendance %</th>
+        <th>Attendance Marks</th>
+        <th>Internal Marks</th>
+        <th>Final Score</th>
+    </tr>
+
+    {% for item in subject_results %}
+    <tr>
+        <td>{{ item.subject.name }}</td>
+        <td>{{ item.attendance_percentage }}%</td>
+        <td>{{ item.attendance_marks }}</td>
+        <td>{{ item.internal_marks }}</td>
+        <td><strong>{{ item.final_subject_score }}</strong></td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+<h3>Grand Total: {{ grand_total }}</h3>
+
+{% else %}
+<p>No subjects found for your batch.</p>
+{% endif %}
+
+<br>
+<a href="{% url 'student_dashboard' %}">
+    <button>Back to Dashboard</button>
+</a>
+
+</div>
+
+{% endblock %}

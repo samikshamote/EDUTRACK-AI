@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}My Attendance{% endblock %}
+{% block header %}My Attendance{% endblock %}
+
+{% block content %}
+
+<h3>Attendance Records</h3>
+
+<table class="table">
+    <tr>
+        <th>Subject</th>
+        <th>Date</th>
+        <th>Status</th>
+    </tr>
+
+    {% for record in records %}
+    <tr>
+        <td>{{ record.subject.name }}</td>
+        <td>{{ record.date }}</td>
+        <td>
+            {% if record.status %}
+                <span style="color:green;">Present</span>
+            {% else %}
+                <span style="color:red;">Absent</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

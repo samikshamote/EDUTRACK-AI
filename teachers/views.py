@@ -34,7 +34,14 @@ import qrcode
 from django.http import HttpResponse
 from io import BytesIO
 
+from attendance.models import Attendance
+from django.db.models import Count, Q
 
+from predictamind.models import InternalMark
+from django.db import transaction
+
+from django.contrib import messages
+from teachers.models import InternalMarks
 
 @login_required
 def teacher_dashboard(request):
@@ -43,18 +50,23 @@ def teacher_dashboard(request):
 
     teacher = request.user.teacher
 
-    # 🔥 Get all attendance linked through timetable
+    # 🔥 Get attendance only through timetable
     attendance_qs = Attendance.objects.filter(
         timetable__teacher=teacher
     )
 
-    # ✅ Correct Counts
+    # ✅ Total unique students
     total_students = attendance_qs.values('student').distinct().count()
     present_count = attendance_qs.filter(status=True).count()
     absent_count = attendance_qs.filter(status=False).count()
 
-    # 🔥 Subject-wise percentage
-    subjects = Subject.objects.filter(teacher=teacher)
+    # 🔥 VERY IMPORTANT FIX
+    # Get subjects ONLY from timetable
+    timetable_subject_ids = Timetable.objects.filter(
+        teacher=teacher
+    ).values_list("subject", flat=True).distinct()
+
+    subjects = Subject.objects.filter(id__in=timetable_subject_ids)
 
     subject_labels = []
     subject_percentages = []
@@ -485,3 +497,123 @@ def generate_registration_qr(request):
 
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
+@login_required
+def enter_marks(request, student_id):
+
+    student = get_object_or_404(Student, id=student_id)
+    subjects = Subject.objects.filter(teacher=request.user.teacher)
+
+    if request.method == "POST":
+        for subject in subjects:
+            internal = request.POST.get(f"internal_{subject.id}")
+            assignment = request.POST.get(f"assignment_{subject.id}")
+
+            if internal and assignment:
+                InternalMark.objects.update_or_create(
+                    student=student,
+                    subject=subject,
+                    defaults={
+                        "internal_marks": internal,
+                        "assignment_marks": assignment
+                    }
+                )
+
+        messages.success(request, "Marks saved successfully.")
+        return redirect("teacher_dashboard")
+
+    return render(request, "teachers/enter_marks.html", {
+        "student": student,
+        "subjects": subjects
+    })
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from students.models import Student
+from attendance.models import Subject
+from .models import InternalMarks
+
+@login_required
+def internal_marks(request):
+
+    department = request.GET.get("department")
+    semester = request.GET.get("semester")
+    year = request.GET.get("year")
+
+    if request.method == "POST":
+        department = request.POST.get("department")
+        semester = request.POST.get("semester")
+        year = request.POST.get("year")
+
+    students = []
+    subjects = []
+    marks_dict = {}
+
+    if department and semester and year:
+
+        # ✅ KEEP ALL STUDENTS (as you requested)
+        students = Student.objects.all()
+        print("STUDENTS COUNT:", students.count())
+
+        subjects = Subject.objects.filter(semester=semester)
+
+        # ==============================
+        # STRICT SAVE MARKS VALIDATION
+        # ==============================
+        if request.method == "POST":
+
+            for student in students:
+                for subject in subjects:
+
+                    mark_value = request.POST.get(
+                        f"marks_{student.id}_{subject.id}"
+                    )
+
+                    if mark_value is not None and mark_value != "":
+                        try:
+                            mark_value = int(mark_value)
+                        except:
+                            messages.error(request, "Invalid mark value!")
+                            return render(request, "teachers/internal_marks.html", locals())
+
+                        # ❌ BLOCK IF >15
+                        if mark_value > 15 or mark_value < 0:
+                            messages.error(
+                                request,
+                                "Marks must be between 0 and 15 only!"
+                            )
+                            return render(request, "teachers/internal_marks.html", locals())
+
+                        InternalMarks.objects.update_or_create(
+                            student=student,
+                            subject=subject,
+                            defaults={"marks": mark_value}
+                        )
+
+            messages.success(request, "Marks saved successfully ✅")
+
+        # ==============================
+        # AUTO FILL EXISTING MARKS
+        # ==============================
+        for student in students:
+            marks_dict[student.id] = {}
+            for subject in subjects:
+                mark_obj = InternalMarks.objects.filter(
+                    student=student,
+                    subject=subject
+                ).first()
+
+                marks_dict[student.id][subject.id] = (
+                    mark_obj.marks if mark_obj else ""
+                )
+
+    context = {
+        "students": students,
+        "subjects": subjects,
+        "marks_dict": marks_dict,
+        "selected_department": department,
+        "selected_semester": semester,
+        "selected_year": year,
+    }
+
+    return render(request, "teachers/internal_marks.html", context)

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How It Works - PredictaMind</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">
+                <i class="fa-solid fa-flask"></i> PredictaMind
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('features') }}">Features</a>
+            <a href="{{ url_for('how_it_works') }}" style="color: var(--primary-blue);">How It Works</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('login') }}" class="btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 4rem; max-width: 900px;">
+        <h1 style="text-align: center; margin-bottom: 2rem;">How PredictaMind Works</h1>
+
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+
+            <div
+                style="display: flex; gap: 2rem; align-items: center; background: var(--bg-light); padding: 2rem; border-radius: 1rem;">
+                <div style="font-size: 3rem; color: var(--primary-blue); font-weight: bold;">1</div>
+                <div>
+                    <h3>Input Your Data</h3>
+                    <p>Enter your current Attendance %, Internal Marks, and Assignment Marks. Also, select any subjects
+                        you feel weak in.</p>
+                </div>
+            </div>
+
+            <div
+                style="display: flex; gap: 2rem; align-items: center; background: var(--bg-light); padding: 2rem; border-radius: 1rem;">
+                <div style="font-size: 3rem; color: var(--primary-blue); font-weight: bold;">2</div>
+                <div>
+                    <h3>AI Processing</h3>
+                    <p>Our machine learning model (trained on historical student data) analyzes your inputs to predict
+                        your potential final score.</p>
+                </div>
+            </div>
+
+            <div
+                style="display: flex; gap: 2rem; align-items: center; background: var(--bg-light); padding: 2rem; border-radius: 1rem;">
+                <div style="font-size: 3rem; color: var(--primary-blue); font-weight: bold;">3</div>
+                <div>
+                    <h3>Get Results & Advice</h3>
+                    <p>Receive your Predicted Score, Pass/Fail probability, and personalized advice. If you are at risk,
+                        we even generate a weekly study timetable for you!</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="{{ url_for('login') }}" class="btn-primary large">Try It Now</a>
+        </div>
+    </div>
+
+</body>
+
+</html>

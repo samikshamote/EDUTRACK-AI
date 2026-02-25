@@ -6,13 +6,32 @@ from attendance.models import Timetable
 # -----------------------------
 # Teacher Profile Form
 # -----------------------------
-# -----------------------------
-# Teacher Profile Form
-# -----------------------------
+
+
 class TeacherProfileForm(forms.ModelForm):
     class Meta:
         model = Teacher
-        fields = ['photo', 'phone', 'qualification']
+        fields = [
+            'first_name',
+            'last_name',
+            'designation',
+            'gender',          # ✅ ADD THIS
+            'department',
+            'photo',
+            'phone',
+            'qualification',
+        ]
+
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'designation': forms.TextInput(attrs={'class': 'form-control'}),
+            'gender': forms.Select(attrs={'class': 'form-control'}),  # ✅ IMPORTANT
+            'department': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'qualification': forms.TextInput(attrs={'class': 'form-control'}),
+            'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
 
 
 # -----------------------------

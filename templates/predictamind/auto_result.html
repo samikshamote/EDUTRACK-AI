@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="background:white; padding:25px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+
+<h2>AI Academic Result Analysis</h2>
+
+<hr>
+
+<p><strong>Attendance:</strong> {{ attendance_percentage }}%</p>
+<p><strong>Academic Average:</strong> {{ academic_average }}</p>
+<p><strong>Final Score:</strong> {{ final_score }}</p>
+<p><strong>Status:</strong> 
+    {% if status == "PASS" %}
+        <span style="color:green;">PASS</span>
+    {% else %}
+        <span style="color:red;">FAIL</span>
+    {% endif %}
+</p>
+
+<hr>
+
+<h4>Subject Scores</h4>
+<ul>
+    {% for subject, score in subjects.items %}
+        <li>{{ subject }} : {{ score }}</li>
+    {% endfor %}
+</ul>
+
+<hr>
+
+<h4>AI Advice</h4>
+<ul>
+    {% for item in advice %}
+        <li>{{ item }}</li>
+    {% endfor %}
+</ul>
+
+<hr>
+
+<h4>Personalized Study Plan</h4>
+<ul>
+    {% for subject, hours in study_plan.items %}
+        <li>{{ subject }} : {{ hours }}</li>
+    {% endfor %}
+</ul>
+
+<br>
+
+<a href="{% url 'generate_pdf' %}" class="btn btn-primary">
+    Download PDF
+</a>
+
+</div>
+
+{% endblock %}

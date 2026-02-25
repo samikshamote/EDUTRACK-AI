@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PredictaMind</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-user-shield"></i> Admin Dashboard</h1>
+            <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i>
+                Logout</a>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <a href="{{ url_for('admin_predict') }}" class="btn-primary" style="text-decoration: none; padding: 12px 25px; font-size: 16px;">
+                <i class="fa-solid fa-calculator"></i> Calculate Student Prediction
+            </a>
+        </div>
+
+        <h2 id="registered-users">Registered Users</h2>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                    <th>Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for username, data in users.items() %}
+                <tr>
+                    <td>{{ username }}</td>
+                    <td>{{ data.full_name }}</td>
+                    <td>{{ data.role }}</td>
+                    <td>{{ data.class }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination"
+            style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                {% if current_user_page > 1 %}
+                <a href="{{ url_for('admin_dashboard', user_page=current_user_page-1, page=current_page, _anchor='registered-users') }}"
+                    class="btn-primary" style="font-size: 0.9rem;">Previous</a>
+                {% else %}
+                <span class="btn-primary" style="opacity: 0.5; cursor: not-allowed; font-size: 0.9rem;">Previous</span>
+                {% endif %}
+            </div>
+
+            <span style="font-weight: 500;">Page {{ current_user_page }} of {{ total_user_pages }}</span>
+
+            <div>
+                {% if current_user_page < total_user_pages %} <a
+                    href="{{ url_for('admin_dashboard', user_page=current_user_page+1, page=current_page, _anchor='registered-users') }}"
+                    class="btn-primary" style="font-size: 0.9rem;">Next</a>
+                    {% else %}
+                    <span class="btn-primary" style="opacity: 0.5; cursor: not-allowed; font-size: 0.9rem;">Next</span>
+                    {% endif %}
+            </div>
+        </div>
+
+        <h2 style="margin-top: 2rem;" id="activity-logs">Activity Logs</h2>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Class</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.timestamp }}</td>
+                    <td>{{ log.student_class }}</td>
+                    <td>{{ log.user }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>{{ log.details.score if log.details else '-' }}</td>
+                    <td>{{ log.details.status if log.details else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination"
+            style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                {% if current_page > 1 %}
+                <a href="{{ url_for('admin_dashboard', page=current_page-1, user_page=current_user_page, _anchor='activity-logs') }}"
+                    class="btn-primary" style="font-size: 0.9rem;">Previous</a>
+                {% else %}
+                <span class="btn-primary" style="opacity: 0.5; cursor: not-allowed; font-size: 0.9rem;">Previous</span>
+                {% endif %}
+            </div>
+
+            <span style="font-weight: 500;">Page {{ current_page }} of {{ total_pages }}</span>
+
+            <div>
+                {% if current_page < total_pages %} <a
+                    href="{{ url_for('admin_dashboard', page=current_page+1, user_page=current_user_page, _anchor='activity-logs') }}"
+                    class="btn-primary" style="font-size: 0.9rem;">Next</a>
+                    {% else %}
+                    <span class="btn-primary" style="opacity: 0.5; cursor: not-allowed; font-size: 0.9rem;">Next</span>
+                    {% endif %}
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

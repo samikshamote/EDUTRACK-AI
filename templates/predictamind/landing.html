@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PredictaMind - Student Performance Prediction</title>
+
+    <!-- Django Static CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body class="landing-page">
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-flask"></i> PredictaMind
+        </div>
+
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#how">How It Works</a>
+            <a href="#contact">Contact</a>
+
+            <!-- Django URL -->
+            <a href="{% url 'login' %}" class="btn-primary">Login</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>PredictaMind</h1>
+            <h2>AI-Based Student Performance<br>Prediction System</h2>
+
+            <p>
+                Predict student performance early to identify at-risk students
+                and provide personalized guidance to help them succeed.
+            </p>
+
+            <div class="login-cards">
+                <a href="{% url 'login' %}" class="login-card student-card">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Student Login</span>
+                </a>
+
+                <a href="{% url 'login' %}" class="login-card admin-card">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <span>Admin / Teacher Login</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-image">
+           <img src="{% static 'images/hand-drawn-business-strategy-with-statistics.png' %}"
+                alt="Student Performance Prediction"
+                style="max-width: 100%; height: auto;">
+        </div>
+    </header>
+
+    <!-- FEATURES SECTION -->
+    <section class="features" id="features">
+        <h3>System Features</h3>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <i class="fa-solid fa-chart-line"></i>
+                <h4>Risk Prediction</h4>
+                <p>Identify students at risk early for timely intervention.</p>
+            </div>
+
+            <div class="feature-card">
+                <i class="fa-solid fa-lightbulb"></i>
+                <h4>Personalized Guidance</h4>
+                <p>Provide tailored advice to help students improve performance.</p>
+            </div>
+
+            <div class="feature-card">
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                <h4>Performance Analytics</h4>
+                <p>Analyze student data and track academic progress.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="features" id="how">
+        <h3>How It Works</h3>
+        <p>
+            Students enter attendance, internal marks, and assignment scores.
+            Our trained Machine Learning model analyzes the data and predicts
+            the final performance along with personalized recommendations.
+        </p>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="features" id="contact">
+        <h3>Contact</h3>
+        <p>Email: support@predictamind.com</p>
+    </section>
+
+</body>
+</html>

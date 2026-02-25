@@ -14,7 +14,7 @@
         <form method="POST" enctype="multipart/form-data" class="edit-form">
             {% csrf_token %}
 
-            <!-- Profile Photo -->
+            <!-- Profile Photo Preview -->
             <div class="photo-section">
                 {% if form.instance.photo %}
                     <img src="{{ form.instance.photo.url }}" class="edit-profile-photo">
@@ -25,16 +25,62 @@
 
             <div class="form-grid">
 
-                <!-- 🔥 EMAIL FIELD -->
+                <!-- Email (from User model) -->
                 <div>
                     <label>Email</label>
-                    <input type="email" name="email"
+                    <input type="email"
+                           name="email"
                            value="{{ request.user.email }}"
                            class="form-control"
                            placeholder="Enter your email">
                 </div>
 
-                {{ form.as_p }}
+                <!-- First Name -->
+                <div>
+                    <label>First Name</label>
+                    {{ form.first_name }}
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label>Last Name</label>
+                    {{ form.last_name }}
+                </div>
+
+                <!-- Designation -->
+                <div>
+                    <label>Designation</label>
+                    {{ form.designation }}
+                </div>
+                <!-- Gender -->
+                    <div>
+                        <label>Gender</label>
+                        {{ form.gender }}
+                    </div>
+
+                <!-- Department -->
+                <div>
+                    <label>Department</label>
+                    {{ form.department }}
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label>Phone</label>
+                    {{ form.phone }}
+                </div>
+
+                <!-- Qualification -->
+                <div>
+                    <label>Qualification</label>
+                    {{ form.qualification }}
+                </div>
+
+                <!-- Profile Photo Upload -->
+                <div>
+                    <label>Profile Photo</label>
+                    {{ form.photo }}
+                </div>
 
             </div>
 
@@ -48,6 +94,7 @@
                     ❌ Cancel
                 </a>
             </div>
+
         </form>
 
     </div>

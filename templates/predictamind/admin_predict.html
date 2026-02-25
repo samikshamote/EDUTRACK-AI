@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Prediction | PredictaMind</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Arial', sans-serif; }
+        .container { max-width: 800px; margin: 50px auto; padding: 30px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #34495e; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; padding: 12px; background: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background 0.3s; }
+        button:hover { background: #34495e; }
+        .back-link { display: block; margin-top: 20px; text-align: center; color: #7f8c8d; text-decoration: none; }
+        .back-link:hover { color: #2c3e50; }
+        .alert { color: #e74c3c; background: #fadbd8; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center; }
+        .subject-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end; }
+        .subject-row > div { flex: 1; }
+        .add-btn { background: #27ae60; margin-bottom: 20px; width: auto; padding: 10px 20px; }
+        .add-btn:hover { background: #2ecc71; }
+        .marks-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .marks-table th, .marks-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        .marks-table th { background-color: #2c3e50; color: white; font-size: 0.9em; }
+        .marks-table input { width: 80px; text-align: center; }
+        .batch-info { background: #e8f6f3; border: 1px solid #27ae60; color: #27ae60; padding: 10px; border-radius: 5px; margin-bottom: 20px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Predict Student Result</h2>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        {% if batch_count > 0 %}
+        <div class="batch-info">
+            Students in Batch Queue: {{ batch_count }}
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="student_username">Select Student</label>
+                <select name="student_username" id="student_username" required>
+                    <option value="" disabled selected>-- Select Student --</option>
+                    {% for username, details in students.items() %}
+                        <option value="{{ username }}">{{ details.class }} - {{ details.full_name }} ({{ username }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="attendance">Attendance (%)</label>
+                <input type="number" name="attendance" id="attendance" step="0.1" min="0" max="100" placeholder="e.g. 75" required style="width: 150px;">
+            </div>
+
+            <h3>Enter Marks</h3>
+            <div style="overflow-x: auto;">
+                <table class="marks-table">
+                    <thead>
+                        <tr>
+                            <th>Subjects</th>
+                            {% for sub in subjects %}
+                            <th>{{ sub }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Internal (Max 10)</strong></td>
+                            {% for sub in subjects %}
+                            <td><input type="number" name="{{ sub }}_internal" min="0" max="10" step="0.1" required></td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Assignment (Max 5)</strong></td>
+                            {% for sub in subjects %}
+                            <td><input type="number" name="{{ sub }}_assignment" min="0" max="5" step="0.1" required></td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button type="submit" name="action" value="add" class="add-btn" style="width: 100%;">+ Add Student to Batch</button>
+
+            {% if batch_count > 0 %}
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button type="submit" name="action" value="predict" style="background: #2980b9;" formnovalidate>Show Results ({{ batch_count }})</button>
+                <button type="submit" name="action" value="clear" style="background: #c0392b;" formnovalidate>Clear Batch</button>
+            </div>
+            {% endif %}
+        </form>
+        <a href="{{ url_for('admin_dashboard') }}" class="back-link">← Back to Dashboard</a>
+    </div>
+
+</body>
+</html>

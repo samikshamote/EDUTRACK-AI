@@ -31,6 +31,7 @@
             <p><strong>Phone:</strong> {{ teacher.phone|default:"Not provided" }}</p>
             <p><strong>Qualification:</strong> {{ teacher.qualification|default:"Not provided" }}</p>
             <p><strong>Total Subjects:</strong> {{ teacher.subject_set.count }}</p>
+            <p><strong>Designation:</strong> {{ teacher.designation|default:"Not provided" }}</p>
         </div>
 
         <!-- ACTIONS -->

@@ -10,11 +10,23 @@ class Student(models.Model):
         ('B-III', 'Batch III'),
     ]
 
+    YEAR_CHOICES = [
+    ('FY', 'First Year'),
+    ('SY', 'Second Year'),
+    ('TY', 'Third Year'),
+]
+
+    year = models.CharField(
+        max_length=2,
+        choices=YEAR_CHOICES,
+        default='FY'
+    )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     roll_number = models.CharField(max_length=20)
     course = models.CharField(max_length=50)
+    semester = models.IntegerField(null=True, blank=True)
 
     photo = models.ImageField(upload_to='profiles/students/', blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True)

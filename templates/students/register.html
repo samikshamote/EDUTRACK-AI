@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h2>Student Registration</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <label>Username:</label>
+        {{ form.username }}
+
+        <label>Email:</label>
+        {{ form.email }}
+
+        <label>Password:</label>
+        {{ form.password }}
+
+        <label>Roll Number:</label>
+        {{ form.roll_number }}
+
+        <label>Course:</label>
+        {{ form.course }}
+
+        <label>Phone:</label>
+        {{ form.phone }}
+
+        <label>Department:</label>
+        {{ form.department }}
+
+        <label>Batch:</label>
+        {{ form.batch }}
+
+        <label>Year:</label>
+        {{ form.year }}
+
+        <br><br>
+        <button type="submit">Register</button>
+    </form>
+</div>
+
+{% endblock %}

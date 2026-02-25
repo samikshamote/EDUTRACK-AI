@@ -1,53 +1,376 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Student Dashboard{% endblock %}
-{% block header %}Student Dashboard{% endblock %}
+
+{% block header %}
+Student Dashboard
+{% endblock %}
 
 {% block content %}
-<h2>Welcome, {{ request.user.username }}</h2>
 
-<!-- Student Info Section -->
-<div class="card">
-    <h3>Your Details</h3>
-    <p><strong>Roll Number:</strong> {{ request.user.student.roll_number }}</p>
-    <p><strong>Batch:</strong> 
-        {% if request.user.student.batch %}
-            {{ request.user.student.batch }}
-        {% else %}
-            Not Assigned
-        {% endif %}
-    </p>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+    --purple-primary: #8B5CF6;
+    --purple-light: #A78BFA;
+    --purple-dark: #7C3AED;
+    --purple-gradient: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 50%, #C4B5FD 100%);
+    --blue-gradient: linear-gradient(135deg, #3B82F6 0%, #60A5FA 50%, #93C5FD 100%);
+    --green-gradient: linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%);
+    --red-gradient: linear-gradient(135deg, #EF4444 0%, #F87171 50%, #FCA5A5 100%);
+    --gray-light: #F8FAFC;
+    --gray-border: #E2E8F0;
+    --text-muted: #64748B;
+    --text-dark: #1E293B;
+}
+
+.dashboard-wrapper {
+    font-family: 'Inter', sans-serif;
+    background: var(--gray-light);
+    padding: 20px;
+    min-height: 100vh;
+}
+
+/* Header */
+.dashboard-header {
+    background: var(--purple-gradient);
+    padding: 20px 30px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.3);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 28px 24px;
+    border-radius: 20px;
+    border: 1px solid var(--gray-border);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--purple-gradient);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+}
+
+.stat-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.lectures .stat-value { color: var(--purple-primary); }
+.present .stat-value { color: #10B981; }
+.absent .stat-value { color: #EF4444; }
+.percentage .stat-value { color: var(--purple-primary); }
+
+/* Charts Section */
+.charts-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.chart-card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid var(--gray-border);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.chart-card h4 {
+    margin: 0 0 24px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* Recent Table */
+.recent-section {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid var(--gray-border);
+    overflow: hidden;
+}
+
+.recent-header {
+    padding: 24px 30px;
+    background: rgba(139, 92, 246, 0.05);
+    border-bottom: 1px solid var(--gray-border);
+}
+
+.recent-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.recent-table th,
+.recent-table td {
+    padding: 16px 30px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.recent-table th {
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.recent-table tbody tr:hover {
+    background: rgba(139, 92, 246, 0.05);
+}
+
+.status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status.present {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.status.absent {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.date {
+    color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .stats-grid,
+    .charts-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid,
+    .charts-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+}
+</style>
+
+<div class="dashboard-wrapper">
+
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1 style="font-size: 28px; font-weight: 700; margin: 0;">Dashboard</h1>
+            <p style="margin: 4px 0 0 0; opacity: 0.9;">Welcome back, Student!</p>
+        </div>
+        <div class="user-info">
+            <div class="user-avatar">CS</div>
+            <span>Student Name</span>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card lectures">
+            <div class="stat-title">Total Lectures</div>
+            <div class="stat-value">{{ total }}</div>
+        </div>
+
+        <div class="stat-card present">
+            <div class="stat-title">Present</div>
+            <div class="stat-value">{{ present }}</div>
+        </div>
+
+        <div class="stat-card absent">
+            <div class="stat-title">Absent</div>
+            <div class="stat-value">{{ total|add:"-present" }}</div>
+        </div>
+
+        <div class="stat-card percentage">
+            <div class="stat-title">Attendance %</div>
+            <div class="stat-value">{{ percentage }}%</div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="chart-card">
+            <h4>Weekly Attendance Overview</h4>
+            <canvas id="barChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h4>Attendance Distribution</h4>
+            <canvas id="doughnutChart"></canvas>
+        </div>
+    </div>
+
+    <!-- =========================
+     📊 RESULT SECTION
+========================= -->
+<div class="recent-section">
+    <div class="recent-header">
+        <h4 style="margin: 0; font-weight: 600;">Latest Exam Result</h4>
+    </div>
+
+    <div style="padding: 30px;">
+
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+
+            <div>
+                <h3 style="margin:0 0 6px 0;">Semester 3 Result</h3>
+                <p style="margin:0; color: var(--text-muted);">
+                    Total Marks: <strong>{{ result_obtained }} / {{ result_total }}</strong>
+                </p>
+                <p style="margin:4px 0 0 0;">
+                    Status:
+                    <span class="status present">{{ result_status }}</span>
+                </p>
+            </div>
+
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <a href="{% url 'student_results' %}" class="btn-primary">
+                    View Detailed Result
+                </a>
+
+                <a href="{% url 'predict_result' %}" class="btn-secondary">
+                    Predict Next Result
+                </a>
+
+                <a href="#" class="btn-primary">
+                    Download PDF
+                </a>
+            </div>
+
+        </div>
+
+    </div>
 </div>
 
-<br>
 
-<div class="cards">
-    <div class="card">
-        <h3>Total Lectures</h3>
-        <p>{{ total }}</p>
-    </div>
-
-    <div class="card">
-        <h3>Present</h3>
-        <p>{{ present }}</p>
-    </div>
-
-    <div class="card">
-        <h3>Absent</h3>
-        <p>{{ total|add:"-present" }}</p>
-    </div>
-
-    <div class="card">
-        <h3>Attendance %</h3>
-        <p>{{ percentage }}%</p>
-    </div>
 </div>
 
-<br>
+<script>
+    // Original Doughnut Chart - now for Traffic Sources
+    const ctxDoughnut = document.getElementById("doughnutChart").getContext("2d");
+    new Chart(ctxDoughnut, {
+        type: "doughnut",
+        data: {
+            labels: ["Present", "Absent"],
+            datasets: [{
+                data: [{{ present }}, {{ total|add:"-present" }}],
+                backgroundColor: [
+                    "#10B981",
+                    "#EF4444"
+                ],
+                borderWidth: 0,
+                cutout: '70%'
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: "bottom"
+                }
+            }
+        }
+    });
 
-<div class="card">
-    <h3>Attendance Summary</h3>
-    <p>Your attendance is calculated automatically using face recognition.</p>
-</div>
+    // New Bar Chart for Visit & Statistics (sample data matching screenshot)
+    const ctxBar = document.getElementById("barChart").getContext("2d");
+    new Chart(ctxBar, {
+        type: "bar",
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            datasets: [{
+                label: 'Present',
+                data: [12, 19, 3, 5, 2],
+                backgroundColor: '#3B82F6'
+            }, {
+                label: 'Absent',
+                data: [2, 3, 20, 5, 9],
+                backgroundColor: '#EF4444'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+</script>
 
 {% endblock %}

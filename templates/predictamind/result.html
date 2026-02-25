@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Prediction Result</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container result-container">
+
+    <h1 class="main-title">📊 AI Performance Dashboard</h1>
+
+    <div class="summary-card">
+        <h2>Final Score: {{ final_score }}</h2>
+
+        <p>
+            Status:
+            <span class="{% if status == 'PASS' %}status-pass{% else %}status-fail{% endif %}">
+                {{ status }}
+            </span>
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>📅 Smart Timetable</h3>
+        <ul>
+            {% for subject, plan in timetable.items %}
+                <li><strong>{{ subject }}</strong> → {{ plan }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>🤖 Personalized AI Advice</h3>
+        <ul>
+            {% for item in advice %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>📊 Subject Performance</h3>
+        <canvas id="subjectChart"></canvas>
+    </div>
+
+    <div class="button-group">
+        <a href="{% url 'home' %}" class="btn-secondary">⬅ Back</a>
+        <a href="{% url 'generate_pdf' %}" class="btn-primary">📄 Download PDF Report</a>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const ctx = document.getElementById('subjectChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [{% for sub in subjects.keys %}"{{ sub }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Total Marks',
+                data: [{% for mark in subjects.values %}{{ mark }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: ['#6366f1','#22c55e','#f59e0b','#ef4444'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+
+});
+</script>
+
+</body>
+</html>

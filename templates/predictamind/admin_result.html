@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Results | PredictaMind</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Arial', sans-serif; }
+        .container { max-width: 900px; margin: 50px auto; padding: 30px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 25px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #2c3e50; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+        .pass { color: #27ae60; font-weight: bold; }
+        .fail { color: #e74c3c; font-weight: bold; }
+        .back-link { display: block; margin-top: 20px; text-align: center; color: #7f8c8d; text-decoration: none; }
+        .summary-box { background: #ecf0f1; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Batch Prediction Results</h2>
+        
+        {% if subject_totals %}
+        <div class="summary-box">
+            <h3>Input Summary</h3>
+            <p><strong>Subjects Calculated:</strong> 
+                {% for sub, total in subject_totals.items() %}
+                    {{ sub }} ({{ total }}), 
+                {% endfor %}
+            <p><strong>Subjects Included:</strong> 
+                {% for sub in subject_names %}
+                    {{ sub }}, 
+                {% endfor %}
+            </p>
+        </div>
+        {% endif %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Student Name</th>
+                    <th>Predicted Score</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for res in results %}
+                <tr>
+                    <td>{{ res.username }}</td>
+                    <td>{{ res.full_name }}</td>
+                    <td>{{ res.score }}</td>
+                    <td class="{{ 'pass' if res.status == 'PASS' else 'fail' }}">
+                        {{ res.status }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Print Results
+            </button>
+        </div>
+
+        <a href="{{ url_for('admin_predict') }}" class="back-link">← Back to Prediction Tool</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="back-link">Go to Dashboard</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PredictaMind</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<h1>PredictaMind - Student Predictor</h1>
+
+<a href="{% url 'login' %}">Login</a>
+
+<form method="POST" action="{% url 'predict' %}">
+    {% csrf_token %}
+
+    <br>
+
+    {% for sub in subjects %}
+        <h3>{{ sub }}</h3>
+        Internal: <input type="number" name="{{ sub }}_internal" required><br>
+        Assignment: <input type="number" name="{{ sub }}_assignment" required><br><br>
+    {% endfor %}
+
+    <button type="submit">Predict</button>
+</form>
+
+</body>
+</html>

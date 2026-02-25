@@ -3,18 +3,46 @@ from django.contrib.auth.models import User
 from .models import Student
 
 
-# 🔹 Existing Profile Form
+# =========================================
+# 🔹 Student Profile Update Form
+# =========================================
 class StudentProfileForm(forms.ModelForm):
+
     class Meta:
         model = Student
-        fields = ['photo', 'phone', 'department']
+        fields = ['photo', 'phone', 'department', 'year']
+
+    YEAR_CHOICES = [
+        ('FY', 'First Year'),
+        ('SY', 'Second Year'),
+        ('TY', 'Third Year'),
+    ]
+
+    year = forms.ChoiceField(
+        choices=YEAR_CHOICES,
+        required=True
+    )
 
 
-# 🔥 NEW Registration Form
+# =========================================
+# 🔥 Student Registration Form
+# =========================================
 class StudentRegistrationForm(forms.ModelForm):
-    username = forms.CharField()
+
+    username = forms.CharField(max_length=150)
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
+
+    YEAR_CHOICES = [
+        ('FY', 'First Year'),
+        ('SY', 'Second Year'),
+        ('TY', 'Third Year'),
+    ]
+
+    year = forms.ChoiceField(
+        choices=YEAR_CHOICES,
+        required=True
+    )
 
     class Meta:
         model = Student
@@ -23,5 +51,6 @@ class StudentRegistrationForm(forms.ModelForm):
             'course',
             'phone',
             'department',
-            'batch'
+            'batch',
+            'year'
         ]

@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PredictaMind - Student Predictor</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<div class="container">
+    <h1>PredictaMind - Student Predictor</h1>
+
+    <a href="{% url 'student_dashboard' %}" class="back-btn">
+        ← Back to Dashboard
+    </a>
+
+    <form method="POST" class="predict-form">
+        {% csrf_token %}
+
+        <div class="subject">
+            <h3>Operating System</h3>
+            <input type="number" name="os_internal" placeholder="Internal Marks" required>
+            <input type="number" name="os_assignment" placeholder="Assignment Marks" required>
+        </div>
+
+        <div class="subject">
+            <h3>Web Technology</h3>
+            <input type="number" name="wt_internal" placeholder="Internal Marks" required>
+            <input type="number" name="wt_assignment" placeholder="Assignment Marks" required>
+        </div>
+
+        <div class="subject">
+            <h3>Data Analytics</h3>
+            <input type="number" name="da_internal" placeholder="Internal Marks" required>
+            <input type="number" name="da_assignment" placeholder="Assignment Marks" required>
+        </div>
+
+        <div class="subject">
+            <h3>Java</h3>
+            <input type="number" name="java_internal" placeholder="Internal Marks" required>
+            <input type="number" name="java_assignment" placeholder="Assignment Marks" required>
+        </div>
+
+        <button type="submit" class="predict-btn">Predict Result</button>
+    </form>
+
+    {% if result %}
+    <div class="result-box">
+        <h2>Prediction Result</h2>
+        <p><strong>Average Score:</strong> {{ score|floatformat:2 }}</p>
+        <p>
+            <strong>Status:</strong> 
+            <span class="{% if status == 'PASS' %}pass{% else %}fail{% endif %}">
+                {{ status }}
+            </span>
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

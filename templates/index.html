@@ -1,0 +1,319 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EDUTRACK AI</title>
+
+    <style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #f8fbff, #eef6ff);
+        color: #0f172a;
+    }
+
+    /* NAVBAR */
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 60px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        position: absolute;
+        width: 100%;
+        z-index: 10;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    }
+
+    .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .logo-section img {
+        height: 55px;
+    }
+
+    .project-title {
+        font-size: 22px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        background: linear-gradient(90deg, #2563eb, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* HERO */
+    .hero {
+        height: 100vh;
+        background: url("{% static 'images/college1.jpg' %}") center/cover no-repeat;
+        position: relative;
+    }
+
+    .hero-overlay {
+        background: linear-gradient(
+            135deg,
+            rgba(203, 230, 255, 0.92),
+            rgba(173, 216, 255, 0.85)
+        );
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .hero h1 {
+        font-size: 60px;
+        letter-spacing: 3px;
+        margin-bottom: 20px;
+        color: #0f172a;
+        text-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .hero p {
+        font-size: 22px;
+        max-width: 700px;
+        color: #1e293b;
+        line-height: 1.6;
+    }
+
+    .hero-buttons {
+        margin-top: 40px;
+    }
+
+    .btn {
+        padding: 14px 32px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        margin: 10px;
+        display: inline-block;
+        transition: 0.3s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #2563eb, #06b6d4);
+        color: white;
+        box-shadow: 0 10px 25px rgba(37,99,235,0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 35px rgba(6,182,212,0.4);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #2563eb;
+        border: 2px solid #2563eb;
+    }
+
+    .btn-secondary:hover {
+        background: #e0f2fe;
+        transform: translateY(-4px);
+    }
+
+    /* ABOUT SECTION */
+    .about {
+        padding: 100px 80px;
+        display: flex;
+        align-items: center;
+        gap: 60px;
+        background: white;
+    }
+
+    .about img {
+        width: 500px;
+        border-radius: 15px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+        transition: 0.3s ease;
+    }
+
+    .about img:hover {
+        transform: scale(1.03);
+    }
+
+    .about-text h2 {
+        font-size: 38px;
+        margin-bottom: 20px;
+        color: #2563eb;
+    }
+
+    .about-text p {
+        line-height: 1.7;
+        color: #475569;
+        font-size: 18px;
+    }
+
+    /* FEATURES */
+    .features {
+        padding: 80px;
+        text-align: center;
+        background: linear-gradient(135deg, #f1f5f9, #e0f2fe);
+    }
+
+    .features h2 {
+        font-size: 36px;
+        margin-bottom: 50px;
+        color: #2563eb;
+    }
+
+    .feature-cards {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        flex-wrap: wrap;
+    }
+
+    .card {
+        background: white;
+        padding: 35px;
+        width: 280px;
+        border-radius: 15px;
+        transition: 0.3s ease;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    }
+
+    .card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 20px 50px rgba(37,99,235,0.25);
+    }
+
+    .card h3 {
+        margin-bottom: 15px;
+        color: #0f172a;
+    }
+
+    /* GALLERY */
+    .gallery {
+        padding: 80px;
+        text-align: center;
+        background: white;
+    }
+
+    .gallery h2 {
+        font-size: 36px;
+        margin-bottom: 30px;
+        color: #2563eb;
+    }
+
+    .gallery img {
+        width: 350px;
+        border-radius: 15px;
+        margin: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        transition: 0.3s ease;
+    }
+
+    .gallery img:hover {
+        transform: scale(1.05);
+    }
+
+    /* FOOTER */
+    footer {
+        background: #0f172a;
+        text-align: center;
+        padding: 25px;
+        color: white;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+        .about {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .about img {
+            width: 90%;
+        }
+
+        .hero h1 {
+            font-size: 40px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <div class="logo-section">
+        <img src="{% static 'images/kaveri_logo.png' %}" alt="Kaveri Logo">
+        <div class="project-title">EDUTRACK AI</div>
+    </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-overlay">
+        <h1>Integrated Attendance & Performance Predictor</h1>
+        <p>
+            A smart academic monitoring system designed to track student attendance
+            and predict academic performance using AI-powered analytics.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="{% url 'login' %}" class="btn btn-primary">Student Login</a>
+            <a href="{% url 'login' %}" class="btn btn-secondary">Admin / Teacher Login</a>
+        </div>
+    </div>
+</div>
+
+<!-- ABOUT -->
+<div class="about">
+    <img src="{% static 'images/chatgpt1.png' %}" alt="AI Illustration">
+
+    <div class="about-text">
+        <h2>About EDUTRACK AI</h2>
+        <p>
+            EDUTRACK AI helps institutions monitor attendance patterns,
+            identify at-risk students early, and predict academic performance
+            through intelligent data analysis.
+        </p>
+    </div>
+</div>
+
+<!-- FEATURES -->
+<div class="features">
+    <h2>Core Features</h2>
+
+    <div class="feature-cards">
+        <div class="card">
+            <h3>Attendance Tracking</h3>
+            <p>Automated digital attendance management.</p>
+        </div>
+
+        <div class="card">
+            <h3>AI Performance Prediction</h3>
+            <p>Predict academic results using smart algorithms.</p>
+        </div>
+
+        <div class="card">
+            <h3>Risk Detection</h3>
+            <p>Identify students who need early academic support.</p>
+        </div>
+    </div>
+</div>
+
+<!-- GALLERY -->
+<div class="gallery">
+    <h2>Our Campus</h2>
+    <img src="{% static 'images/college1.jpg' %}" alt="Campus">
+    <img src="{% static 'images/auditorium.jpg' %}" alt="Auditorium">
+</div>
+
+<!-- FOOTER -->
+<footer>
+    © 2026 Kaveri College | EDUTRACK AI Project
+</footer>
+
+</body>
+</html>
