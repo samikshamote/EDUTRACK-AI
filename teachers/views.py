@@ -37,7 +37,7 @@ from io import BytesIO
 from attendance.models import Attendance
 from django.db.models import Count, Q
 
-from predictamind.models import InternalMark
+#from predictamind.models import InternalMark
 from django.db import transaction
 
 from django.contrib import messages
@@ -533,6 +533,9 @@ from students.models import Student
 from attendance.models import Subject
 from .models import InternalMarks
 
+import openpyxl
+from django.db import transaction
+
 @login_required
 def internal_marks(request):
 
@@ -551,16 +554,67 @@ def internal_marks(request):
 
     if department and semester and year:
 
-        # ✅ KEEP ALL STUDENTS (as you requested)
         students = Student.objects.all()
-        print("STUDENTS COUNT:", students.count())
-
         subjects = Subject.objects.filter(semester=semester)
 
-        # ==============================
-        # STRICT SAVE MARKS VALIDATION
-        # ==============================
-        if request.method == "POST":
+        # =====================================================
+        # ✅ EXCEL IMPORT LOGIC
+        # =====================================================
+        if request.method == "POST" and "import_excel" in request.POST:
+
+            excel_file = request.FILES.get("excel_file")
+
+            if not excel_file:
+                messages.error(request, "Please upload an Excel file.")
+                return render(request, "teachers/internal_marks.html", locals())
+
+            try:
+                workbook = openpyxl.load_workbook(excel_file)
+                sheet = workbook.active
+
+                with transaction.atomic():
+
+                    for row in sheet.iter_rows(min_row=2, values_only=True):
+
+                        username = str(row[0]).strip()
+
+                        try:
+                            student = Student.objects.get(
+                                user__username=username
+                            )
+                        except Student.DoesNotExist:
+                            continue
+
+                        for col_index, subject in enumerate(subjects, start=1):
+                            mark_value = row[col_index]
+
+                            if mark_value is None:
+                                continue
+
+                            mark_value = int(mark_value)
+
+                            if mark_value < 0 or mark_value > 15:
+                                messages.error(
+                                    request,
+                                    f"Invalid marks for {username}. Must be 0-15."
+                                )
+                                return render(request, "teachers/internal_marks.html", locals())
+
+                            InternalMarks.objects.update_or_create(
+                                student=student,
+                                subject=subject,
+                                defaults={"marks": mark_value}
+                            )
+
+                messages.success(request, "Excel marks imported successfully ✅")
+
+            except Exception as e:
+                messages.error(request, f"Error reading Excel file: {str(e)}")
+
+        # =====================================================
+        # ✅ MANUAL SAVE MARKS
+        # =====================================================
+        elif request.method == "POST":
 
             for student in students:
                 for subject in subjects:
@@ -576,7 +630,6 @@ def internal_marks(request):
                             messages.error(request, "Invalid mark value!")
                             return render(request, "teachers/internal_marks.html", locals())
 
-                        # ❌ BLOCK IF >15
                         if mark_value > 15 or mark_value < 0:
                             messages.error(
                                 request,
@@ -592,9 +645,9 @@ def internal_marks(request):
 
             messages.success(request, "Marks saved successfully ✅")
 
-        # ==============================
-        # AUTO FILL EXISTING MARKS
-        # ==============================
+        # =====================================================
+        # ✅ AUTO FILL EXISTING MARKS
+        # =====================================================
         for student in students:
             marks_dict[student.id] = {}
             for subject in subjects:

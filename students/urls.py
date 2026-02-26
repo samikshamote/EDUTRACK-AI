@@ -13,8 +13,7 @@ urlpatterns = [
     path('predict-result/', views.predict_result, name='predict_result'),
     path('timetable/', views.student_timetable, name='student_timetable'),
     path('attendance/', views.student_attendance, name='student_attendance'),
-    path('manual-result/', views.manual_result, name='manual_result'),
-    path('download-pdf/', views.download_pdf, name='download_pdf'),
+    path('download-result-pdf/', views.download_result_pdf, name='download_result_pdf'),
 
 ]
     

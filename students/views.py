@@ -126,6 +126,9 @@ def student_register(request):
 # =====================================================
 # STUDENT RESULTS
 # =====================================================
+from django.db.models import Count, Q
+from django.db.models.functions import TruncMonth
+
 @login_required
 def student_results(request):
     if not hasattr(request.user, 'student'):
@@ -134,95 +137,131 @@ def student_results(request):
     student = request.user.student
     semester = student.semester
 
-    # ✅ Correct filtering
-    internal_records = InternalMarks.objects.filter(
-        student=student,
-        subject__semester=semester
+    subjects = Subject.objects.filter(semester=semester)
+    subject_data = []
+
+    total_internal = 0
+    total_subjects = subjects.count()
+
+    weak_subjects = []
+
+    for subject in subjects:
+
+        # =============================
+        # ATTENDANCE CALCULATION
+        # =============================
+        total_classes = Attendance.objects.filter(
+            student=student,
+            subject=subject
+        ).count()
+
+        present_classes = Attendance.objects.filter(
+            student=student,
+            subject=subject,
+            status=True
+        ).count()
+
+        attendance_percentage = (
+            (present_classes / total_classes) * 100
+            if total_classes > 0 else 0
+        )
+
+        # =============================
+        # INTERNAL MARKS
+        # =============================
+        mark_obj = InternalMarks.objects.filter(
+            student=student,
+            subject=subject
+        ).first()
+
+        internal_marks = mark_obj.marks if mark_obj else 0
+        total_internal += internal_marks
+
+        pass_status = "PASS" if internal_marks >= 6 else "FAIL"
+
+        if internal_marks < 6:
+            weak_subjects.append(subject.name)
+
+        # =============================
+        # FINAL SCORE (simple formula)
+        # =============================
+        final_score = round(
+            (attendance_percentage * 0.2) + (internal_marks * 5),
+            2
+        )
+
+        subject_data.append({
+            "subject": subject.name,
+            "attendance": round(attendance_percentage, 2),
+            "internal": internal_marks,
+            "status": pass_status,
+            "final_score": final_score
+        })
+
+    # =============================
+    # OVERALL PERFORMANCE
+    # =============================
+    overall_percentage = (
+        (total_internal / (total_subjects * 15)) * 100
+        if total_subjects > 0 else 0
     )
 
-    if not internal_records.exists():
-        return render(request, "students/results.html", {
-            "error": "No subjects found for this semester."
+    # =============================
+    # MONTHLY ATTENDANCE
+    # =============================
+    monthly_records = (
+        Attendance.objects
+        .filter(student=student)
+        .annotate(month=TruncMonth("date"))
+        .values("month")
+        .annotate(
+            total=Count("id"),
+            present=Count("id", filter=Q(status=True))
+        )
+        .order_by("month")
+    )
+
+    monthly_data = []
+    for m in monthly_records:
+        percent = (m["present"] / m["total"]) * 100 if m["total"] > 0 else 0
+        monthly_data.append({
+            "month": m["month"].strftime("%B"),
+            "percentage": round(percent, 2)
         })
 
-    subject_results = []
-    total_marks = 0
-
-    for record in internal_records:
-        subject_name = record.subject.name
-        marks = record.marks
-        total_marks += marks
-
-        subject_results.append({
-            "subject": subject_name,
-            "marks": marks
-        })
-
-    total_subjects = internal_records.count()
-
-    # ✅ Each subject is out of 15 (not 100)
-    percentage = (total_marks / (total_subjects * 15)) * 100
-
-    # Grade logic
-    if percentage >= 90:
-        grade = "A"
-        status = "PASS"
-    elif percentage >= 75:
-        grade = "B"
-        status = "PASS"
-    elif percentage >= 50:
-        grade = "C"
-        status = "PASS"
+    # =============================
+    # AI ADVICE
+    # =============================
+    if overall_percentage >= 75:
+        advice = "Excellent performance. Maintain consistency."
+    elif overall_percentage >= 50:
+        advice = "Good performance. Focus more on weak subjects."
     else:
-        grade = "F"
-        status = "FAIL"
+        advice = "Performance is low. Increase study time and attendance."
+
+    # =============================
+    # AI STUDY PLAN
+    # =============================
+    study_plan = []
+    for weak in weak_subjects:
+        study_plan.append(f"Spend 1 extra hour daily on {weak}")
+
+    if not study_plan:
+        study_plan.append("Maintain current study routine.")
 
     context = {
-        "subject_results": subject_results,
-        "total": total_marks,
-        "percentage": round(percentage, 2),
-        "grade": grade,
-        "status": status,
-        "semester": semester
+        "subjects": subject_data,
+        "overall_percentage": round(overall_percentage, 2),
+        "monthly_data": monthly_data,
+        "advice": advice,
+        "study_plan": study_plan
     }
 
     return render(request, "students/results.html", context)
-    # =====================================================
+
+# =====================================================
 # MANUAL RESULT GENERATOR (Student Self Calculation)
 # =====================================================
-@login_required
-def manual_result(request):
-    if not hasattr(request.user, 'student'):
-        return redirect('teacher_dashboard')
-
-    results = []
-    total = 0
-
-    if request.method == "POST":
-        subjects = request.POST.getlist('subject')
-        marks = request.POST.getlist('marks')
-
-        for subject, mark in zip(subjects, marks):
-            try:
-                mark = int(mark)
-            except:
-                mark = 0
-
-            total += mark
-
-            results.append({
-                "subject": subject,
-                "marks": mark
-            })
-
-        return render(request, "students/manual_result.html", {
-            "results": results,
-            "total": total
-        })
-
-    return render(request, "students/manual_result.html")
-
-
 # =====================================================
 # PREDICT RESULT
 # =====================================================
@@ -298,14 +337,6 @@ def predict_result(request):
         chart = base64.b64encode(image_png).decode('utf-8')
         buffer.close()
         plt.close()
-
-        request.session['pdf_data'] = {
-            'results': results,
-            'total': total,
-            'percentage': percentage,
-            'grade': grade,
-            'status': status
-        }
 
         return render(request, 'students/predict.html', {
             "results": results,
@@ -399,134 +430,177 @@ def student_register(request):
 
     return render(request, 'students/register.html', {'form': form})
 
-from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib import colors
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.lib.units import inch
-from django.http import HttpResponse
-import io
 
-
-from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import inch
-from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 from django.utils.timezone import now
+from django.conf import settings
 import io
 import os
 
-
 @login_required
-def download_pdf(request):
-    data = request.session.get('pdf_data')
+def download_result_pdf(request):
 
-    if not data:
-        return redirect('predict_result')
+    if not hasattr(request.user, 'student'):
+        return redirect('teacher_dashboard')
+
+    student = request.user.student
+    semester = student.semester
+    subjects = Subject.objects.filter(semester=semester)
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
     styles = getSampleStyleSheet()
 
-    # =========================
+    # =====================================
+    # WATERMARK FUNCTION
+    # =====================================
+    def add_watermark(canvas_obj, doc):
+        canvas_obj.saveState()
+        canvas_obj.setFont("Helvetica", 60)
+        canvas_obj.setFillColorRGB(0.92, 0.92, 0.92)
+        canvas_obj.drawCentredString(300, 400, "ACADEMIC PORTAL")
+        canvas_obj.restoreState()
+
+    # =====================================
     # COLLEGE LOGO
-    # =========================
+    # =====================================
     logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'kaveri_logo.png')
 
     if os.path.exists(logo_path):
-        logo = Image(logo_path, 1.2 * inch, 1.2 * inch)
+        logo = Image(logo_path, 1.3 * inch, 1.3 * inch)
         elements.append(logo)
 
     elements.append(Spacer(1, 0.2 * inch))
 
-    # =========================
-    # TITLE
-    # =========================
-    elements.append(Paragraph("<b>OFFICIAL STUDENT RESULT REPORT</b>", styles["Heading1"]))
+    # =====================================
+    # UNIVERSITY HEADER
+    # =====================================
+    elements.append(Paragraph("<b>OFFICIAL UNIVERSITY MARKSHEET</b>", styles["Heading1"]))
     elements.append(Spacer(1, 0.3 * inch))
 
-    # =========================
-    # STUDENT INFO
-    # =========================
-    student_name = request.user.username
-    elements.append(Paragraph(f"<b>Student Name:</b> {student_name}", styles["Normal"]))
+    elements.append(Paragraph(f"<b>Student Name:</b> {request.user.username}", styles["Normal"]))
+    elements.append(Paragraph(f"<b>Semester:</b> {semester}", styles["Normal"]))
     elements.append(Paragraph(f"<b>Date Generated:</b> {now().strftime('%d %B %Y')}", styles["Normal"]))
-    elements.append(Spacer(1, 0.3 * inch))
+    elements.append(Spacer(1, 0.4 * inch))
 
-    # =========================
-    # TABLE
-    # =========================
-    table_data = [["Subject", "Marks"]]
+    # =====================================
+    # SUBJECT TABLE
+    # =====================================
+    table_data = [["Subject", "Attendance %", "Internal", "Final Score"]]
 
-    for r in data['results']:
-        table_data.append([r['subject'], r['marks']])
+    grand_total = 0
+    total_internal = 0
+    subject_count = subjects.count()
 
-    table = Table(table_data, colWidths=[3 * inch, 2 * inch])
+    for subject in subjects:
+
+        total_classes = Attendance.objects.filter(
+            student=student, subject=subject
+        ).count()
+
+        present_classes = Attendance.objects.filter(
+            student=student, subject=subject, status=True
+        ).count()
+
+        attendance_percentage = (
+            (present_classes / total_classes) * 100
+            if total_classes > 0 else 0
+        )
+
+        mark_obj = InternalMarks.objects.filter(
+            student=student, subject=subject
+        ).first()
+
+        internal_marks = mark_obj.marks if mark_obj else 0
+        total_internal += internal_marks
+
+        final_score = round(
+            (attendance_percentage * 0.2) + (internal_marks * 5), 2
+        )
+
+        grand_total += final_score
+
+        table_data.append([
+            subject.name,
+            f"{round(attendance_percentage,2)}%",
+            internal_marks,
+            final_score
+        ])
+
+    table = Table(table_data, colWidths=[2.2*inch, 1.2*inch, 1.2*inch, 1.2*inch])
 
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
-        ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
-        ('FONTSIZE', (0, 0), (-1, -1), 11),
+        ('BACKGROUND', (0,0), (-1,0), colors.darkblue),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (1,1), (-1,-1), 'CENTER'),
+        ('GRID', (0,0), (-1,-1), 0.8, colors.grey),
+        ('FONTSIZE', (0,0), (-1,-1), 10),
+        ('BOTTOMPADDING', (0,0), (-1,0), 10),
     ]))
 
     elements.append(table)
-    elements.append(Spacer(1, 0.3 * inch))
+    elements.append(Spacer(1, 0.4 * inch))
 
-    # =========================
-    # SUMMARY
-    # =========================
-    elements.append(Paragraph(f"<b>Total:</b> {data['total']}", styles["Normal"]))
-    elements.append(Paragraph(f"<b>Percentage:</b> {data['percentage']}%", styles["Normal"]))
-    elements.append(Paragraph(f"<b>Grade:</b> {data['grade']}", styles["Normal"]))
-    elements.append(Paragraph(f"<b>Status:</b> {data['status']}", styles["Normal"]))
-    elements.append(Spacer(1, 0.3 * inch))
+    # =====================================
+    # OVERALL CALCULATION
+    # =====================================
+    overall_percentage = (
+        (total_internal / (subject_count * 15)) * 100
+        if subject_count > 0 else 0
+    )
 
-    # =========================
-    # PERFORMANCE BADGE
-    # =========================
-    percentage = data['percentage']
-
-    if percentage >= 90:
+    # Grade Logic
+    if overall_percentage >= 90:
+        grade = "A+"
         badge = "🏆 Outstanding Performer"
-        advice = "Excellent academic performance. Keep up the exceptional work!"
-    elif percentage >= 75:
-        badge = "🎖 Very Good Performance"
-        advice = "Strong performance. Aim for higher consistency."
-    elif percentage >= 50:
-        badge = "👍 Satisfactory Performance"
-        advice = "You passed. Focus on improving weaker subjects."
+    elif overall_percentage >= 75:
+        grade = "A"
+        badge = "🎖 Excellent Performance"
+    elif overall_percentage >= 60:
+        grade = "B"
+        badge = "👍 Good Performance"
+    elif overall_percentage >= 50:
+        grade = "C"
+        badge = "Satisfactory"
     else:
-        badge = "⚠ Needs Improvement"
-        advice = "Significant improvement required. Seek academic guidance."
+        grade = "F"
+        badge = "Needs Improvement"
+
+    # AI Advice
+    if overall_percentage >= 75:
+        advice = "Excellent academic performance. Maintain consistency."
+    elif overall_percentage >= 50:
+        advice = "Good performance. Focus more on weaker subjects."
+    else:
+        advice = "Performance is low. Increase study time and attendance."
+
+    # =====================================
+    # SUMMARY SECTION
+    # =====================================
+    elements.append(Paragraph(f"<b>Grand Total Score:</b> {round(grand_total,2)}", styles["Heading3"]))
+    elements.append(Paragraph(f"<b>Overall Percentage:</b> {round(overall_percentage,2)}%", styles["Heading3"]))
+    elements.append(Paragraph(f"<b>Grade:</b> {grade}", styles["Heading3"]))
+    elements.append(Spacer(1, 0.2 * inch))
 
     elements.append(Paragraph(f"<b>Performance Badge:</b> {badge}", styles["Heading3"]))
     elements.append(Spacer(1, 0.2 * inch))
 
-    elements.append(Paragraph("<b>Personalized Advice:</b>", styles["Heading3"]))
+    elements.append(Paragraph("<b>AI Academic Advice:</b>", styles["Heading3"]))
     elements.append(Spacer(1, 0.1 * inch))
     elements.append(Paragraph(advice, styles["Normal"]))
     elements.append(Spacer(1, 0.5 * inch))
 
-    # =========================
-    # SIGNATURE LINE
-    # =========================
-    elements.append(Paragraph("__________________________", styles["Normal"]))
-    elements.append(Paragraph("Authorized Signature", styles["Normal"]))
-
-    # =========================
-    # WATERMARK
-    # =========================
-    def add_watermark(canvas_obj, doc):
-        canvas_obj.saveState()
-        canvas_obj.setFont("Helvetica", 60)
-        canvas_obj.setFillColorRGB(0.9, 0.9, 0.9)
-        canvas_obj.drawCentredString(300, 400, "CONFIDENTIAL")
-        canvas_obj.restoreState()
+    # =====================================
+    # SIGNATURE
+    # =====================================
+    elements.append(Paragraph("______________________________", styles["Normal"]))
+    elements.append(Paragraph("Controller of Examinations", styles["Normal"]))
 
     doc.build(elements, onFirstPage=add_watermark)
 

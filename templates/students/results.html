@@ -1,44 +1,218 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="page-container">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<h2>Student Result Report</h2>
+<style>
+.page-container {
+    padding: 30px;
+    animation: fadeIn 0.8s ease-in-out;
+    background: #ffffff !important;
+    color: #000000 !important;
+}
 
-{% if subject_results %}
+@keyframes fadeIn {
+    from {opacity:0; transform: translateY(20px);}
+    to {opacity:1; transform: translateY(0);}
+}
 
-<table border="1" cellpadding="10" width="100%">
-    <tr>
-        <th>Subject</th>
-        <th>Attendance %</th>
-        <th>Attendance Marks</th>
-        <th>Internal Marks</th>
-        <th>Final Score</th>
-    </tr>
+h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-align: center;
+    color: #1e3c72;
+}
 
-    {% for item in subject_results %}
-    <tr>
-        <td>{{ item.subject.name }}</td>
-        <td>{{ item.attendance_percentage }}%</td>
-        <td>{{ item.attendance_marks }}</td>
-        <td>{{ item.internal_marks }}</td>
-        <td><strong>{{ item.final_subject_score }}</strong></td>
-    </tr>
-    {% endfor %}
-</table>
+.card {
+    background: #ffffff !important;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: 0.3s ease;
+    color: #000000 !important;
+}
 
-<br>
-<h3>Grand Total: {{ grand_total }}</h3>
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
+th {
+    background: linear-gradient(90deg, #1e3c72, #2a5298);
+    color: #ffffff;
+    padding: 12px;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+th:first-child {
+    border-top-left-radius: 8px;
+}
+
+th:last-child {
+    border-top-right-radius: 8px;
+}
+
+td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #eee;
+}
+
+tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #ddd;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #0072ff;
+}
+
+.badge-pass {
+    color: green;
+    font-weight: bold;
+}
+
+.badge-fail {
+    color: red;
+    font-weight: bold;
+}
+</style>
+
+<div class="page-container" id="resultContent">
+
+<h2>📊 Smart Student Performance Report</h2>
+
+<div class="card">
+<table>
+<tr>
+<th>Subject</th>
+<th>Attendance %</th>
+<th>Internal</th>
+<th>Status</th>
+<th>Final Score</th>
+</tr>
+
+{% for s in subjects %}
+<tr>
+<td>{{ s.subject }}</td>
+
+<td>
+{{ s.attendance }}%
+<div class="progress-bar">
+<div class="progress-fill" style="width:{{ s.attendance }}%"></div>
+</div>
+</td>
+
+<td>{{ s.internal }}</td>
+
+<td>
+{% if s.status == "PASS" %}
+<span class="badge-pass">✔ PASS</span>
 {% else %}
-<p>No subjects found for your batch.</p>
+<span class="badge-fail">✘ FAIL</span>
 {% endif %}
+</td>
 
-<br>
-<a href="{% url 'student_dashboard' %}">
-    <button>Back to Dashboard</button>
-</a>
+<td><strong>{{ s.final_score }}</strong></td>
+</tr>
+{% endfor %}
+</table>
+</div>
+
+<div class="card">
+<h3>🎯 Overall Performance</h3>
+<h2>{{ overall_percentage }}%</h2>
+<div class="progress-bar">
+<div class="progress-fill" style="width:{{ overall_percentage }}%"></div>
+</div>
+</div>
+
+<div class="card">
+<h3>🧠 AI Performance Analysis</h3>
+<p>{{ advice }}</p>
+
+<h4>📘 Recommended Study Plan</h4>
+<ul>
+{% for plan in study_plan %}
+<li>{{ plan }}</li>
+{% endfor %}
+</ul>
+</div>
+
+<div class="card">
+<h3>📈 Subject Performance Chart</h3>
+<canvas id="marksChart"></canvas>
+</div>
+
+<div class="card">
+<h3>📅 Monthly Attendance Trend</h3>
+<canvas id="attendanceChart"></canvas>
+</div>
 
 </div>
+
+<br>
+
+<a href="{% url 'download_result_pdf' %}" target="_blank">
+<button style="padding:10px 20px;border:none;background:#28a745;color:white;border-radius:8px;margin-right:10px;">
+📄 Download Official Marksheet
+</button>
+</a>
+
+<a href="{% url 'student_dashboard' %}">
+<button style="padding:10px 20px;border:none;background:#0072ff;color:white;border-radius:8px;">
+Back to Dashboard
+</button>
+</a>
+
+<script>
+
+// Charts
+const subjectLabels = [{% for s in subjects %}"{{ s.subject }}",{% endfor %}];
+const subjectMarks = [{% for s in subjects %}{{ s.internal }},{% endfor %}];
+
+new Chart(document.getElementById('marksChart'), {
+type: 'bar',
+data: {
+labels: subjectLabels,
+datasets: [{
+label: 'Internal Marks',
+data: subjectMarks,
+backgroundColor: '#36a2eb'
+}]
+},
+options: {responsive: true}
+});
+
+const monthLabels = [{% for m in monthly_data %}"{{ m.month }}",{% endfor %}];
+const monthData = [{% for m in monthly_data %}{{ m.percentage }},{% endfor %}];
+
+new Chart(document.getElementById('attendanceChart'), {
+type: 'line',
+data: {
+labels: monthLabels,
+datasets: [{
+label: 'Attendance %',
+data: monthData,
+borderColor: '#0072ff',
+backgroundColor: 'rgba(0,114,255,0.2)',
+fill: true
+}]
+},
+options: {responsive: true}
+});
+
+
+</script>
 
 {% endblock %}
