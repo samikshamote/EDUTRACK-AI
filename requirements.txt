@@ -13,6 +13,5 @@ numpy
 pandas
 scikit-learn
 joblib
-xhtml2pdf
 qrcode
 openpyxl
