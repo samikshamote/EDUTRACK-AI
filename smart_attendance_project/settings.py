@@ -158,3 +158,10 @@ EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = 'edutrackai2026@gmail.com'
 EMAIL_HOST_PASSWORD = 'tfjndbeglvucawmj'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://edutrack-ai-production.up.railway.app'
+],
+ALLOWED_HOSTS = [
+    'edutrack-ai-production.up.railway.app',
+]
