@@ -161,7 +161,4 @@ EMAIL_HOST_PASSWORD = 'tfjndbeglvucawmj'
 
 CSRF_TRUSTED_ORIGINS = [
     'https://edutrack-ai-production.up.railway.app'
-],
-ALLOWED_HOSTS = [
-    'edutrack-ai-production.up.railway.app',
 ]
